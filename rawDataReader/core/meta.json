@@ -1,0 +1,35 @@
+{
+
+
+
+	"__comment"    : "meta data for rawDataReader",
+	"__instrument" : ["AE33","AE43","NEPH","SMPS-3080-3788","SMPS-3080-3772","APS-3321","TEOM"],
+
+
+	"NEPH" : {
+				"extension" : ".DAT",
+				"freq"		: "5T"
+
+				},
+
+
+
+	"Meteo" : {
+				"extension" : ".csv",
+				"freq"		: "1h"
+
+				}
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
