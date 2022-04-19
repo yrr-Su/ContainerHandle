@@ -1,12 +1,15 @@
 
 from datetime import datetime as dtm
+from datetime import timedelta as dtmdt
 from pandas import date_range, concat
 from pathlib import Path
+from ..utils.config import meta
 import pickle as pkl
-import json as jsn
+
+# import json as jsn
 
 __all__ = [
-			'reader'
+			'_reader'
 
 	]
 
@@ -17,27 +20,9 @@ __all__ = [
 
 
 # """
-
-
-# logger setting
-# import logging
-
-# LOG_NAM = 'dev'
-# FMT = { 'dev' :	dict( format  = '[%(name)s| %(levelname)s]	%(message)s',
-					  # level	  = logging.DEBUG,
-					# ),
-		# 'rls' :	dict( format  = '[%(levelname)s| %(asctime)s] - %(message)s',
-					  # datefmt = '%Y-%m-%d %H:%M:%S',
-					  # level	  = logging.INFO,
-					# ),
-# }
-# logging.basicConfig(**FMT[LOG_NAM])
-# logger = logging.getLogger(LOG_NAM)
-
-
 # meta data
-with (Path(__file__).parent/'meta.json').open('r',encoding='utf-8',errors='ignore') as f:
-	meta = jsn.load(f)
+# with (Path(__file__).parent/'meta.json').open('r',encoding='utf-8',errors='ignore') as f:
+	# meta = jsn.load(f)
 
 
 
@@ -45,20 +30,18 @@ with (Path(__file__).parent/'meta.json').open('r',encoding='utf-8',errors='ignor
 ## parant class (read file)
 ## list the file in the path and 
 ## read pickle file if it exisits, else read raw data and dump the pickle file
-class readerFlow:
+class _reader:
 	
 	nam = None
 
 	## initial setting
 	## input : file path, 
-	##		   start time,
-	##		   final time,
 	##		   reset switch
 	## 
 	## the pickle file will be generated after read raw data first time,
 	## if want to re-read the rawdata, please set 'reset=True'
 
-	def __init__(self,_path,_sta,_fin,reset=False):
+	def __init__(self,_path,QC=True,csv=True,reset=False):
 		# logger.info(f'\n{self.nam}')
 		# print('='*65)
 		# logger.info(f"Reading file and process data")
@@ -66,30 +49,54 @@ class readerFlow:
 		## class parameter
 		self.index = lambda _freq: date_range(_sta,_fin,freq=_freq)
 		self.path  = Path(_path)
-		self.reset = reset
 		self.meta  = meta[self.nam]
+
+		self.reset = reset
+		self.qc    = QC
+		self.csv   = csv
+
 		self.pkl_nam = f'{self.nam.lower()}.pkl'
-		self.__time	 = (_sta,_fin)
+		self.csv_nam = f'{self.nam.lower()}.csv'
 		
 		# print(f" from {_sta.strftime('%Y-%m-%d %X')} to {_fin.strftime('%Y-%m-%d %X')}")
 		# print('='*65)
 		# print(f"{dtm.now().strftime('%m/%d %X')}")
 
-	def __raw_reader(self,_file):
-		## customize each instrument
-		## read one filess
-		return None
-
-	def __raw_process(self,_df,_freq):
-		## customize each instrument
-		out = _df.resample(_freq).mean().reindex(self.index(_freq))
-		return out
-	
+	## dependency injection function
 	## read raw data
-	def __reader(self):
+	def _raw_reader(self,_file):
+		## customize each instrument
+		## read one file
+		pass
+
+	## QC data
+	def _QC(self,_df):
+		## customize each instrument
+		pass
+
+	## built-in function
+	## get time from df and set time to whole time to create time index
+	def _time2whole(self,_st,_ed,_freq):
+		## set time index to whole time
+		_st, _ed  = date_range(_st,_ed,freq=_freq)[[0,-1]]
+		_tm_index = date_range(_st.strftime('%Y%m%d %H00'),
+							  (_ed+dtmdt(hours=1)).strftime('%Y%m%d %H00'),
+							  freq=_freq)
+		return _tm_index
+
+	## set each to true datetime(18:30:01 -> 18:30:00) and rindex data
+	def _raw_process(self,_df,_freq):
+
+		_tm_index = self._time2whole(*_df.index[[0,-1]],_freq)
+
+		_out = _df.resample(_freq).mean().reindex(_tm_index)
+		return _out
+
+	## read raw data
+	def _run(self):
 
 		## read pickle if pickle file exisits and 'reset=False' or process raw data
-		if (self.pkl_nam in [_.name for _ in self.path.glob('*.pkl')])&(~self.reset):
+		if (self.path/self.pkl_nam in list(self.path.glob('*.pkl')))&(~self.reset):
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mPICKLE\033[0m file of {self.nam}")
 			with (self.path/self.pkl_nam).open('rb') as f:
 				fout = pkl.load(f)
@@ -97,46 +104,45 @@ class readerFlow:
 		else: 
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mRAW DATA\033[0m of {self.nam} and process it")
 		##=================================================================================================================
-		## metadata parameter
-		ext_nam, dt_freq = self.meta.values()
-
 		## read raw data
 		_df_con = None
-		
-		for file in self.path.glob(f'*{ext_nam}'):
-			# if ext_nam not in file.lower(): continue
+
+		for file in self.path.glob(f"*{self.meta['extension']}"):
 			print(f"\r\t\treading {file.name}",end='')
 
-			_df = self.__raw_reader(file)
+			_df = self._raw_reader(file)
 
+			## concat the concated list
 			if _df is not None:
 				_df_con = concat([_df_con,_df]) if _df_con is not None else _df
 
-		## concat the concated list
-		fout = self.__raw_process(_df_con,dt_freq)
+		
+		## reindex data and QC
+		_fout = self._raw_process(_df_con,self.meta['freq'])
+		if self.qc:
+			_fout = self._QC(_fout)
 		print()
 
 		##=================================================================================================================
 		## dump pickle file
 		with (self.path/self.pkl_nam).open('wb') as f:
-			pkl.dump(fout,f,protocol=pkl.HIGHEST_PROTOCOL)
+			pkl.dump(_fout,f,protocol=pkl.HIGHEST_PROTOCOL)
 
-		return fout
+		## dump csv file
+		if self.csv:
+			_fout.to_csv(self.path/self.csv_nam)
 
-	## get process data
-	def get_data(self,start=None,final=None,mean_freq=None):
+		return _fout
 
-		## get dataframe data and process to wanted time range
-		_freq = mean_freq if mean_freq is not None else self.meta['freq']
-		_time = (start,final) if start is not None else self.__time
+	## get data
+	def __call__(self,start=None,end=None,mean_freq=None):
 
-		return self.__reader().resample(_freq).mean().reindex(date_range(*_time,freq=_freq))
+		_fout = self._run()
 
-	## get process data
-	def __call__(self,start=None,final=None,mean_freq=None):
+		if start is not None:
+			_fout = _fout.reindex(date_range(start,end,freq=self.meta['freq']))
+		
+		if mean_freq is not None:
+			_fout = _fout.resample(mean_freq).mean()
 
-		## get dataframe data and process to wanted time range
-		_freq = mean_freq if mean_freq is not None else self.meta['freq']
-		_time = (start,final) if start is not None else self.__time
-
-		return self.__reader().resample(_freq).mean().reindex(date_range(*_time,freq=_freq))
+		return _fout
