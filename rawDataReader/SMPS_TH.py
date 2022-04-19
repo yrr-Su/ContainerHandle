@@ -1,7 +1,7 @@
 
 
 from .core import _reader
-from pandas import to_datetime, read_csv
+from pandas import to_datetime, read_table
 from datetime import datetime as dtm
 from pathlib import Path
 
@@ -9,58 +9,37 @@ from pathlib import Path
 
 class reader(_reader):
 
-	nam = 'NEPH'
+	nam = 'SMPS_TH'
 
 	def _raw_reader(self,_file):
+		with open(_file,'r',encoding='utf-8',errors='ignore') as f:
+			_df  = read_table(f,skiprows=18,parse_dates={'Time':['Date','Start Time']}).set_index('Time')
+			_key = list(_df.keys()[7:-26])
 
-		## pre-process data as csv file
-		with (_file).open('r',encoding='utf-8',errors='ignore') as f_rd, \
-			 (self.path/f'temp.csv').open('w',encoding='utf-8',errors='ignore') as f_wri:
+			_newkey = {}
+			for _k in _key: 
+				_newkey[_k] = float(_k).__round__(4)
 
-			for _l in f_rd:
-				f_wri.write(_l.rstrip('\n')+','*(11-_l.split(',').__len__())+'\n')
+			_newkey['Total Conc.(#/cm)'] = 'total'
+			_newkey['Mode(nm)']	= 'mode'
 
-		## read csv file
-		with (self.path/f'temp.csv').open('r',encoding='utf-8',errors='ignore') as f:
-
-			_df = read_csv(f,header=None,names=range(11))
-			_df_grp = _df.groupby(0)
-
-			## T : time
-			_df_tm = _df_grp.get_group('T')[[1,2,3,4,5,6]].astype(int)
-
-			for _k in [2,3,4,5,6]:
-				_df_tm[_k] = _df_tm[_k].astype(int).map('{:02d}'.format).copy()
-			_df_tm = _df_tm.astype(str)
-
-			_idx_tm = to_datetime((_df_tm[1]+_df_tm[2]+_df_tm[3]+_df_tm[4]+_df_tm[5]+_df_tm[6]),format='%Y%m%d%H%M%S')
-
-			## D : data
-			## col : 3~8 B G R BB BG BR
-			## 1e6
-			_df_dt = _df_grp.get_group('D')[[1,2,3,4,5,6,7,8]].set_index(_idx_tm)
-			_df_out = (_df_dt.groupby(1).get_group('NBXX')[[3,4,5,6,7,8]]*1e6).reindex(_idx_tm)
-			_df_out.columns = ['B','G','R','BB','BG','BR']
-			_df_out.index.name = 'Time'
-
-			## Y : state
-			## col : 5 RH
-			_df_out['RH'] = _df_grp.get_group('Y')[5].values
-			
-		return _df_out
+		return _df[_newkey.keys()].rename(_newkey,axis=1)
 
 	## QC data
 	def _QC(self,_df):
 		
-		## call by _QC function
-		## QC data in 1 hr
-		def _QC_func(_df_1hr):
+		## 1-hr mean
+		_df_1hr = _df.resample('1h').mean().copy()
 
-			_df_ave = _df_1hr.mean()
-			_df_std = _df_1hr.std()
-			_df_lowb, _df_highb = _df_1hr<(_df_ave-_df_std*1.5), _df_1hr>(_df_ave+_df_std*1.5)
+		## 1-hr data clean
+		## mask out the data size lower than 7
+		_df_size = _df['total'].dropna().resample('1h').size().reindex(_df_1hr.index)
+		_df_1hr  = _df_1hr.mask(_df_size<7)
 
-			return _df_1hr.mask(_df_lowb|_df_highb).copy()
+		## remove the bin over 400 nm which num. conc. larger than 4000 
+		_df_remv_ky = _df_1hr.keys()[:-2][_df_1hr.keys()[:-2]>=400.]
 
-		return _df.resample('1h').apply(_QC_func)
+		_df_1hr[_df_remv_ky] = _df_1hr[_df_remv_ky].copy().mask(_df_1hr[_df_remv_ky]>4000.)
+
+		return _df_1hr
 

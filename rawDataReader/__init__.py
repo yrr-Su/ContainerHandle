@@ -2,7 +2,9 @@
 
 __all__ = [
 			'NEPH',
-			'Meteo'
+			'Meteo',
+			'APS_3321',
+			'SMPS_TH',
 
 
 
