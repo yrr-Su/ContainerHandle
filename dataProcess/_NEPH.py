@@ -1,27 +1,21 @@
 
 
 __all__ = [
-			'SAEcalc',
+			'_SAE',
 
 
 
 	]
 
 
-def SAEcalc(df_neph):
 
-	# def __init__(self):
 
-	def _QCdata(_df):
-		_df_ave = _df.mean()
-		_df_std = _df.std()
-		_df_lowb, _df_highb = _df<(_df_ave-_df_std*1.5), _df>(_df_ave+_df_std*1.5)
 
-		return _df.mask(_df_lowb|_df_highb).copy()
+def _SAE(df):
+	import numpy as n
+	from scipy.optimize import curve_fit
 
 	def _SAEcalc(_df):
-		import numpy as n
-		from scipy.optimize import curve_fit
 
 		## parameter
 		band = n.array([450,550,700])*1e-3
@@ -40,9 +34,9 @@ def SAEcalc(df_neph):
 
 		return _SAE
 
+	df_out = _SAEcalc(df[['B','G','R']].dropna())
 
-	df_qc = df_neph[['B','G','R']].resample('1h').apply(_QCdata).dropna()
-	return _SAEcalc(df_qc)
+	return df_out.reindex(df.index)
 
 
 
