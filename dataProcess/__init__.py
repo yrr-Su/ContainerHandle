@@ -18,11 +18,9 @@ __all__ = [
 class NEPH:
 	
 	def __init__(self,path_out=None,excel=True):
-		from _NEPH import *
-		
+
 		self.path_out = path_out
 		self.excel	  = excel
-		self.csv 	  = csv
 
 	def _save_out(self,_nam,_out):
 
@@ -35,6 +33,7 @@ class NEPH:
 					_out.to_excel(f,sheet_name=f'{_nam}')
 
 	def SAE(self,df,nam='SAE'):
+		from ._NEPH import _SAE
 
 		out = _SAE(df)
 		self._save_out(nam,out)
@@ -44,13 +43,11 @@ class NEPH:
 
 
 class SizeDistr:
-	
+
 	def __init__(self,path_out=None,excel=True):
-		from _SizeDistr import *
 
 		self.path_out = path_out
 		self.excel	  = excel
-		self.csv 	  = csv
 
 	def _save_out(self,_nam,_out):
 
@@ -61,9 +58,10 @@ class SizeDistr:
 			if self.excel:
 				with ExcelWriter(self.path_out/f'{_nam}.xlsx') as f: 
 					for _key, _val in _out.items():
-						_out.to_excel(f,sheet_name=f'{_key}')
+						_val.to_excel(f,sheet_name=f'{_key}')
 
 	def basic(self,df,nam):
+		from ._SizeDistr import _basic
 
 		out = _basic(df)
 		self._save_out(nam,out)
