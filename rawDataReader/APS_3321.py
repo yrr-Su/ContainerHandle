@@ -17,14 +17,19 @@ class reader(_reader):
 			_df  = read_table(f,skiprows=6,parse_dates={'Time':['Date','Start Time']}).set_index('Time')
 			_key = list(_df.keys()[3:54]) ## 542 ~ 1981
 
+			## get the first bin values and calculate the real number conc.
+			_df_first = _df[_df.keys()[2]].copy()*n.diff(n.log10(_df.keys().to_numpy(float))).mean()
+
+			## create new keys
 			_newkey = {}
 			for _k in _key: 
 				_newkey[_k] = float(_k).__round__(4)
 			_newkey['Total Conc.'] = 'total'
 			_newkey['Mode(m)'] = 'mode'
 
+			## get new dataframe
 			_df = _df[_newkey.keys()].rename(_newkey,axis=1)
-			_df['total'] = (_df.total.copy().map(lambda _: _.strip('(#/cm3)'))).astype(float)
+			_df['total'] = (_df.total.copy().map(lambda _: _.strip('(#/cm3)'))).astype(float)-_df_first
 
 		return _df
 
