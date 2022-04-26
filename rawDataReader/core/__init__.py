@@ -55,8 +55,8 @@ class _reader:
 		self.qc    = QC
 		self.csv   = csv
 
-		self.pkl_nam = f'{self.nam.lower()}.pkl'
-		self.csv_nam = f'{self.nam.lower()}.csv'
+		self.pkl_nam = f'read_{self.nam.lower()}.pkl'
+		self.csv_nam = f'read_{self.nam.lower()}.csv'
 		
 		# print(f" from {_sta.strftime('%Y-%m-%d %X')} to {_fin.strftime('%Y-%m-%d %X')}")
 		# print('='*65)
@@ -72,7 +72,7 @@ class _reader:
 	## QC data
 	def _QC(self,_df):
 		## customize each instrument
-		pass
+		return _df
 
 	## built-in function
 	## get time from df and set time to whole time to create time index
@@ -115,7 +115,6 @@ class _reader:
 			## concat the concated list
 			if _df is not None:
 				_df_con = concat([_df_con,_df]) if _df_con is not None else _df
-
 		
 		## reindex data and QC
 		_fout = self._raw_process(_df_con,self.meta['freq'])
