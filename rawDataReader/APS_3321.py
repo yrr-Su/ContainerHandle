@@ -18,7 +18,7 @@ class reader(_reader):
 			_key = list(_df.keys()[3:54]) ## 542 ~ 1981
 
 			## get the first bin values and calculate the real number conc.
-			_df_first = _df[_df.keys()[2]].copy()*n.diff(n.log10(_df.keys()[3:54].to_numpy(float))).mean()
+			_df_first = _df[_df.keys()[2]].copy()*n.diff(n.log(_df.keys()[3:54].to_numpy(float))).mean()
 
 			## create new keys
 			_newkey = {}

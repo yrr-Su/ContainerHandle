@@ -20,7 +20,7 @@ meta = {
 
 		"SMPS_TH" : {
 					 "extension" : ".txt",
-					 "freq"		: "6T",
+					 "freq"		 : "6T",
 
 					 },
 
@@ -29,6 +29,13 @@ meta = {
 					  "freq"	  : "6T",
 
 					  },
+
+		"AE33" : {
+				  "extension" : ".dat",
+				  "freq"	  : "1T",
+
+				  },
+
 
 
 

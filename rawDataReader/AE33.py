@@ -13,33 +13,29 @@ class reader(_reader):
 
 	def _raw_reader(self,_file):
 		with open(_file,'r',encoding='utf-8',errors='ignore') as f:
-			_df  = read_table(f,skiprows=18,parse_dates={'Time':['Date','Start Time']}).set_index('Time')
-			_key = list(_df.keys()[7:-26])
+			_df = read_table(f,parse_dates={'time':['Date(yyyy/MM/dd);','Time(hh:mm:ss);']},
+							 index_col='time',delimiter=' ',skiprows=[0,1,2,3,4,6,7])
+			_df = _df[['BC1;','BC2;','BC3;','BC4;','BC5;','BC6;','BC7;',]]
 
-			_newkey = {}
-			for _k in _key: 
-				_newkey[_k] = float(_k).__round__(4)
+			_df.columns = ['BC1','BC2','BC3','BC4','BC5','BC6','BC7',]
 
-			_newkey['Total Conc.(#/cm)'] = 'total'
-			_newkey['Mode(nm)']	= 'mode'
-
-		return _df[_newkey.keys()].rename(_newkey,axis=1)
+			return _df
 
 	## QC data
 	def _QC(self,_df):
 		
-		## 1-hr mean
-		_df_1hr = _df.resample('1h').mean().copy()
+		## remove negative value
+		_df = _df.mask((_df<0).copy())
 
-		## 1-hr data clean
-		## mask out the data size lower than 7
-		_df_size = _df['total'].dropna().resample('1h').size().reindex(_df_1hr.index)
-		_df_1hr  = _df_1hr.mask(_df_size<7)
+		## call by _QC function
+		## QC data in 1 hr
+		def _QC_func(_df_1hr):
 
-		## remove the bin over 400 nm which num. conc. larger than 4000 
-		_df_remv_ky = _df_1hr.keys()[:-2][_df_1hr.keys()[:-2]>=400.]
+			_df_ave = _df_1hr.mean()
+			_df_std = _df_1hr.std()
+			_df_lowb, _df_highb = _df_1hr<(_df_ave-_df_std*1.5), _df_1hr>(_df_ave+_df_std*1.5)
 
-		_df_1hr[_df_remv_ky] = _df_1hr[_df_remv_ky].copy().mask(_df_1hr[_df_remv_ky]>4000.)
+			return _df_1hr.mask(_df_lowb|_df_highb).copy()
 
-		return _df_1hr
+		return _df.resample('1h').apply(_QC_func)
 

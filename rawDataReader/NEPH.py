@@ -51,6 +51,9 @@ class reader(_reader):
 
 	## QC data
 	def _QC(self,_df):
+
+		## remove negative value
+		_df = _df.mask((_df<0).copy())
 		
 		## call by _QC function
 		## QC data in 1 hr
