@@ -120,7 +120,7 @@ class _reader:
 		## reindex data and QC
 		_fout = self._raw_process(_df_con,self.meta['freq'])
 		if self.qc:
-			_fout, self.meta['freq'] = self._QC(_fout)
+			_fout = self._QC(_fout)
 		print()
 
 		##=================================================================================================================
@@ -140,7 +140,7 @@ class _reader:
 		_fout = self._run()
 
 		if start is not None:
-			_fout = _fout.reindex(date_range(start,end,freq=self.meta['freq']))
+			_fout = _fout.reindex(date_range(start,end,freq=_fout.index.freq.copy()))
 		
 		if mean_freq is not None:
 			_fout = _fout.resample(mean_freq).mean()

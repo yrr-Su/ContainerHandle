@@ -17,4 +17,4 @@ class reader(_reader):
 		with (_file).open('r',encoding='utf-8',errors='ignore') as f:
 			_df = read_csv(f,parse_dates=['Time'],index_col='Time',na_values=['-'])
 
-		return _df, '1h'
+		return _df

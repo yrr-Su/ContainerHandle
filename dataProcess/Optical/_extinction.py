@@ -1,5 +1,4 @@
 
-from pandas import date_range, concat, DataFrame
 
 def _extCoe(df_abs,df_sca):
 
@@ -21,6 +20,12 @@ def _SSA(df_abs,df_sca):
 
 
 def _basic(df_abs,df_sca):
-	
+	from pandas import DataFrame
+	import numpy as n
+
+	df_out = DataFrame(n.nan).set_index(df_abs.index)
+
+	## extinction coe.
+	df_out['ext'] = df_abs['BC6']+df_sca['G']
 
 
