@@ -41,5 +41,5 @@ class reader(_reader):
 
 		_df_1hr[_df_remv_ky] = _df_1hr[_df_remv_ky].copy().mask(_df_1hr[_df_remv_ky]>4000.)
 
-		return _df_1hr
+		return _df_1hr, '1h'
 

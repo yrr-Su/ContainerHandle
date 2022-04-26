@@ -1,5 +1,17 @@
 
 
+
+def _absCoe(df):
+	import numpy as n
+
+	MAE = n.array([18.47,14.54,13.14,11.58,10.35,7.77,7.19])*1e-3
+
+	return df*MAE
+
+
+
+
+
 def _AAE(df):
 	import numpy as n
 	from scipy.optimize import curve_fit
@@ -9,7 +21,7 @@ def _AAE(df):
 		## parameter
 		MAE  = n.array([18.47,14.54,13.14,11.58,10.35,7.77,7.19])*1e-3
 		band = n.array([370,470,520,590,660,880,950])
-		_df  *= MAE
+		_df *= MAE
 
 		## 7 pts fitting
 		## function

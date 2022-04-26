@@ -30,7 +30,7 @@ class SizeDistr:
 				pkl.dump(_out,f,protocol=pkl.HIGHEST_PROTOCOL)
 
 			if self.excel:
-				with ExcelWriter(self.path_out/f'{_nam}.xlsx') as f: 
+				with ExcelWriter(self.path_out/f'{_nam}.xlsx') as f:
 					for _key, _val in _out.items():
 						_val.to_excel(f,sheet_name=f'{_key}')
 

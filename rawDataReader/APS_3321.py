@@ -52,4 +52,4 @@ class reader(_reader):
 		## remove total num. conc. larger than 1000
 		_df_1hr = _df_1hr.mask(_df_1hr.total>1000)
 
-		return _df_1hr
+		return _df_1hr, '1h'

@@ -120,7 +120,7 @@ class _reader:
 		## reindex data and QC
 		_fout = self._raw_process(_df_con,self.meta['freq'])
 		if self.qc:
-			_fout = self._QC(_fout)
+			_fout, self.meta['freq'] = self._QC(_fout)
 		print()
 
 		##=================================================================================================================
