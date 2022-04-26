@@ -1,8 +1,10 @@
-
+import pickle as pkl
+from pandas import ExcelWriter
 
 __all__ = [
 			'scattering',
 			'absorption',
+			'basic',
 
 
 
@@ -11,10 +13,11 @@ __all__ = [
 
 class _writter:
 
-	def __init__(self,path_out=None,excel=True):
+	def __init__(self,path_out=None,excel=True,csv=False):
 
 		self.path_out = path_out
 		self.excel	  = excel
+		self.csv	  = csv
 
 	def _save_out(self,_nam,_out):
 
@@ -29,6 +32,17 @@ class _writter:
 							_val.to_excel(f,sheet_name=f'{_key}')
 					else:
 						_out.to_excel(f,sheet_name=f'{_nam}')
+
+			if self.csv:
+				if type(_out)==dict():
+					_path_out = self.path_out/_nam
+					_path_out.mkdir()
+
+					for _key, _val in _out.items():
+						_val.to_csv(_path_out/f'{_key}.csv')
+				else:
+					_out.to_csv(self.path_out/f'{_nam}.csv')
+
 
 
 class scattering(_writter):
@@ -46,7 +60,7 @@ class absorption(_writter):
 	def absCoe(self,df,nam='absCoe'):
 		from ._absorption import _absCoe
 
-		out = _AAE(df)
+		out = _absCoe(df)
 		self._save_out(nam,out)
 
 		return out
