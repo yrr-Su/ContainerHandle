@@ -36,6 +36,12 @@ meta = {
 
 				  },
 
+		"AE43" : {
+				  "extension" : ".csv",
+				  "freq"	  : "1T",
+
+				  },
+
 
 
 

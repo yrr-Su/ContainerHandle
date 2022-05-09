@@ -1,7 +1,7 @@
 
 
 from .core import _reader
-from pandas import to_datetime, read_table
+from pandas import to_datetime, read_csv
 from datetime import datetime as dtm
 from pathlib import Path
 
@@ -9,20 +9,21 @@ from pathlib import Path
 
 class reader(_reader):
 
-	nam = 'AE33'
+	nam = 'AE43'
 
 	def _raw_reader(self,_file):
 		with open(_file,'r',encoding='utf-8',errors='ignore') as f:
-			_df = read_table(f,parse_dates={'time':['Date(yyyy/MM/dd);','Time(hh:mm:ss);']},
-							 index_col='time',delimiter=' ',skiprows=[0,1,2,3,4,6,7])
-			_df = _df[['BC1;','BC2;','BC3;','BC4;','BC5;','BC6;','BC7;','Status;']]
-
-			_df.columns = ['BC1','BC2','BC3','BC4','BC5','BC6','BC7','Status']
+			_df = read_csv(f,parse_dates={'time':['StartTime']},index_col='time')
+			_df_id = _df['SetupID'].iloc[-1]
 			
+			## get last SetupID data	
+			_df = _df.groupby('SetupID').get_group(_df_id)[['BC1','BC2','BC3','BC4','BC5','BC6','BC7','Status']].copy()
+
 			## remove data without Status=0
 			_df = _df.where(_df['Status']==0).copy()
 
 			return _df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7']]
+
 
 	## QC data
 	def _QC(self,_df):
