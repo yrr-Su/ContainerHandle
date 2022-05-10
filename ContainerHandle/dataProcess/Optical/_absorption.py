@@ -37,6 +37,7 @@ def _AAE(df):
 
 		return _AAE
 
-	df_out = _AAEcalc(df[['B','G','R']].dropna())
+	df_out = _AAEcalc(df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7']].dropna())
+	df_out = df_out.mask((-df_out.slope<0.8)|(-df_out.slope>2.)).copy()
 
 	return df_out.reindex(df.index)
