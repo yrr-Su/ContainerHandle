@@ -33,7 +33,9 @@ def _basic(df):
 	out_dic['volume_norm']  = out_dic['number_norm']*n.pi*(dp**3)/6
 
 	## mode, total and GMD
-	df_oth['GMD']= (((out_dic['number']*n.log(dp)).sum(axis=1))/df_oth['total'].copy()).apply(n.exp)
+	df_oth['total'] = out_dic['number'].sum(axis=1)
+	df_oth['total'] = df_oth['total'].where(df_oth['total']>0).copy()
+	df_oth['GMD']   = (((out_dic['number']*n.log(dp)).sum(axis=1))/df_oth['total'].copy()).apply(n.exp)
 
 	out_dic['other'] = df_oth
 

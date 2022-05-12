@@ -14,7 +14,7 @@ class reader(_reader):
 	def _raw_reader(self,_file):
 		with open(_file,'r',encoding='utf-8',errors='ignore') as f:
 			_df  = read_table(f,skiprows=18,parse_dates={'Time':['Date','Start Time']}).set_index('Time')
-			_key = list(_df.keys()[7:-26])
+			_key = list(_df.keys()[6:-26])
 
 			_newkey = {}
 			for _k in _key: 
