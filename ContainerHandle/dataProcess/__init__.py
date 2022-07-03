@@ -20,7 +20,7 @@ class SizeDistr:
 
 	def __init__(self,path_out=None,excel=True):
 
-		self.path_out = path_out
+		self.path_out = Path(path_out)
 		self.excel	  = excel
 
 	def _save_out(self,_nam,_out):

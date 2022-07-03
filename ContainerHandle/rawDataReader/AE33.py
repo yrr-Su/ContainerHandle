@@ -13,10 +13,9 @@ class reader(_reader):
 
 	def _raw_reader(self,_file):
 		with open(_file,'r',encoding='utf-8',errors='ignore') as f:
-			_df = read_table(f,parse_dates={'time':['Date(yyyy/MM/dd);','Time(hh:mm:ss);']},
-							 index_col='time',delimiter=' ',skiprows=[0,1,2,3,4,6,7])
-			_df = _df[['BC1;','BC2;','BC3;','BC4;','BC5;','BC6;','BC7;','Status;']]
-
+			_df = pd.read_table(f,parse_dates={'time':[0,1]},index_col='time',
+								delimiter='\s+',skiprows=8,names=range(70))
+			_df = _df[[40,43,46,49,52,55,58,32]]
 			_df.columns = ['BC1','BC2','BC3','BC4','BC5','BC6','BC7','Status']
 			
 			## remove data without Status=0
