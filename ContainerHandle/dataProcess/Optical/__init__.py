@@ -75,10 +75,10 @@ class absorption(_writter):
 
 class basic(_writter):
 	
-	def __call__(self,df_abs,df_sca,nam='basic'):
+	def __call__(self,df_abs,df_sca,df_pm25,nam='basic'):
 		from ._extinction import _basic
 
-		out = _basic(df_abs,df_sca)
+		out = _basic(df_abs,df_sca,df_pm25)
 		self._save_out(nam,out)
 		
 		return out
