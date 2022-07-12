@@ -10,6 +10,17 @@ __all__ = [
 	]
 
 
+def _geometric_prop(_dp,_prop,_prop_t):
+	import numpy as n
+	_dp = n.log(_dp)
+	_gmd = (((_prop*_dp).sum(axis=1))/_prop_t.copy())
+
+
+	_dp_mesh, _gmd_mesh = n.meshgrid(_dp,_gmd)
+	_gsd = ((((_dp_mesh-_gmd_mesh)**2)*_prop).sum(axis=1)/_prop_t.copy())**.5
+
+	return _gmd.apply(n.exp), _gsd.apply(n.exp)
+
 
 def _basic(df):
 	import numpy as n
@@ -35,7 +46,8 @@ def _basic(df):
 	## mode, total and GMD
 	df_oth['total'] = out_dic['number'].sum(axis=1)
 	df_oth['total'] = df_oth['total'].where(df_oth['total']>0).copy()
-	df_oth['GMD']   = (((out_dic['number']*n.log(dp)).sum(axis=1))/df_oth['total'].copy()).apply(n.exp)
+
+	df_oth['GMD'], df_oth['GSD'] = _geometric_prop(dp,out_dic['number'],df_oth['total'])
 
 	out_dic['other'] = df_oth
 
