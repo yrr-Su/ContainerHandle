@@ -6,7 +6,11 @@ def _absCoe(df):
 
 	MAE = n.array([18.47,14.54,13.14,11.58,10.35,7.77,7.19])*1e-3
 
-	return df*MAE
+	df_out = df*MAE
+	df_out['eBC'] = df['BC6']
+
+
+	return df_out
 
 
 
@@ -40,4 +44,5 @@ def _AAE(df):
 	df_out = _AAEcalc(df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7']].dropna())
 	df_out = df_out.mask((-df_out.slope<0.8)|(-df_out.slope>2.)).copy()
 
+	df_out['eBC'] = df['BC6']
 	return df_out.reindex(df.index)

@@ -21,6 +21,9 @@ def _basic(df_abs,df_sca,df_pm25):
 	df_out['MSE'] = df_out['sca']/df_pm25
 	df_out['MEE'] = df_out['MSE']+df_out['MAE']
 
+	## other
+	df_out['eBC'] = df_abs['eBC']
+
 	return df_out
 
 

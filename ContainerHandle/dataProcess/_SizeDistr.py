@@ -10,8 +10,12 @@ __all__ = [
 	]
 
 
-def _geometric_prop(_dp,_prop,_prop_t):
+def _geometric_prop(_dp,_prop):
 	import numpy as n
+
+	_prop_t = _prop.sum(axis=1)
+	_prop_t = _prop_t.where(_prop_t>0).copy()
+
 	_dp = n.log(_dp)
 	_gmd = (((_prop*_dp).sum(axis=1))/_prop_t.copy())
 
@@ -19,7 +23,7 @@ def _geometric_prop(_dp,_prop,_prop_t):
 	_dp_mesh, _gmd_mesh = n.meshgrid(_dp,_gmd)
 	_gsd = ((((_dp_mesh-_gmd_mesh)**2)*_prop).sum(axis=1)/_prop_t.copy())**.5
 
-	return _gmd.apply(n.exp), _gsd.apply(n.exp)
+	return _prop_t, _gmd.apply(n.exp), _gsd.apply(n.exp)
 
 
 def _basic(df):
@@ -44,10 +48,9 @@ def _basic(df):
 	out_dic['volume_norm']  = out_dic['number_norm']*n.pi*(dp**3)/6
 
 	## mode, total and GMD
-	df_oth['total'] = out_dic['number'].sum(axis=1)
-	df_oth['total'] = df_oth['total'].where(df_oth['total']>0).copy()
-
-	df_oth['GMD'], df_oth['GSD'] = _geometric_prop(dp,out_dic['number'],df_oth['total'])
+	df_oth['total'], df_oth['GMD'], df_oth['GSD'] = _geometric_prop(dp,out_dic['number'])
+	df_oth['total_surf'], df_oth['GMD_surf'], df_oth['GSD_surf'] = _geometric_prop(dp,out_dic['surface'])
+	df_oth['total_volume'], df_oth['GMD_volume'], df_oth['GSD_volume'] = _geometric_prop(dp,out_dic['volume'])
 
 	out_dic['other'] = df_oth
 
