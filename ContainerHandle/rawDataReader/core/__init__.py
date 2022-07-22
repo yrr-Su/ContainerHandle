@@ -131,12 +131,11 @@ class _reader:
 			if self.meta['deter_key'] is not None:
 				_key = self.meta['deter_key']
 
-				_the_size  = len(_fout.index)
-				_real_size = len(_fout[_key].copy().dropna().index)
-				_QC_size   = len(_fout_qc[_key].copy().dropna().index)
-				
-				_acq_rate = round((_real_size/_the_size)*100,2)
-				_yid_rate = round((_QC_size/_real_size)*100,2)
+				_the_size  = len(_fout.resample('1h').mean().index)
+				_real_size = len(_fout[_key].resample('1h').mean().copy().dropna().index)
+				_QC_size   = len(_fout_qc[_key].resample('1h').mean().copy().dropna().index)
+				_acq_rate  = round((_real_size/_the_size)*100,2)
+				_yid_rate  = round((_QC_size/_real_size)*100,2)
 
 				with (self.path/f'{self.nam}.log').open('a+') as f:
 					f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
@@ -168,9 +167,6 @@ class _reader:
 		fout = self._run(start,end)
 		# _fout = self._run()
 
-		if start is not None:
-			fout = fout.reindex(date_range(start,end,freq=_fout.index.freq.copy()))
-		
 		if mean_freq is not None:
 			fout = fout.resample(mean_freq).mean()
 
