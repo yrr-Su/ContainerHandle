@@ -7,7 +7,7 @@ def _basic(df_abs,df_sca,df_pm25):
 	df_out = DataFrame()
 
 	## abs and sca coe
-	df_out['abs'] = df_abs['BC6'].copy()
+	df_out['abs'] = df_abs['abs'].copy()
 	df_out['sca'] = df_sca['G'].copy()
 
 	## extinction coe.

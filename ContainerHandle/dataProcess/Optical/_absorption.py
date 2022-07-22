@@ -3,12 +3,22 @@
 
 def _absCoe(df):
 	import numpy as n
+	from scipy.optimize import curve_fit
+
+	band = n.array([370,470,520,590,660,880,950])
+
+	def _get_slope(__df):
+		func = lambda _x, _sl, _int : _sl*_x+_int
+		popt, pcov = curve_fit(func,band,__df)
+
+		return func(550,*popt)
+
 
 	MAE = n.array([18.47,14.54,13.14,11.58,10.35,7.77,7.19])*1e-3
 
-	df_out = df*MAE
+	df_out = (df.copy()*MAE).dropna().apply(_get_slope,axis=1).to_frame().reindex(df.index)
+	df_out.columns = ['abs']
 	df_out['eBC'] = df['BC6']
-
 
 	return df_out
 

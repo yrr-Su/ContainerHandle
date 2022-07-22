@@ -46,14 +46,14 @@ class reader(_reader):
 			## Y : state
 			## col : 5 RH
 			_df_out['RH'] = _df_grp.get_group('Y')[5].values
-			
+
 		return _df_out
 
 	## QC data
 	def _QC(self,_df):
 
 		## remove negative value
-		_df = _df.mask((_df<0).copy())
+		_df = _df.mask((_df<=0).copy())
 		
 		## call by _QC function
 		## QC data in 1 hr
