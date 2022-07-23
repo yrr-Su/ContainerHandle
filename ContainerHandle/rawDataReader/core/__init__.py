@@ -1,7 +1,7 @@
 
 from datetime import datetime as dtm
 from datetime import timedelta as dtmdt
-from pandas import date_range, concat
+from pandas import date_range, concat, to_numeric
 from pathlib import Path
 from ..utils.config import meta
 import pickle as pkl
@@ -16,9 +16,6 @@ __all__ = [
 
 # bugs box
 """
-
-acquisition rate
-yield rate
 
 # """
 # meta data
@@ -90,7 +87,7 @@ class _reader:
 
 		_tm_index = self._time2whole(_df)
 
-		_out = _df.resample(self.meta['freq']).mean().reindex(_tm_index)
+		_out = _df.apply(to_numeric,errors='coerce').resample(self.meta['freq']).mean().reindex(_tm_index)
 		return _out
 
 	## read raw data
@@ -114,17 +111,16 @@ class _reader:
 			print(f"\r\t\treading {file.name}",end='')
 
 			_df = self._raw_reader(file)
-
 			## concat the concated list
 			if _df is not None:
 				_df_con = concat([_df_con,_df]) if _df_con is not None else _df
-		
+		print()
+
 		## reindex data and QC
 		_fout = self._raw_process(_df_con)
 		_start, _end = _start or _fout.index[0], _end or _fout.index[0]
 
 		_fout = _fout.reindex(date_range(_start,_end,freq=_fout.index.freq.copy()))
-
 		if self.qc:
 			_fout_qc = self._QC(_fout)
 
@@ -146,7 +142,6 @@ class _reader:
 
 				print(f'\n\t\tacquisition rate : {_acq_rate}%')
 				print(f'\t\tyield rate : {_yid_rate}%')
-				print()
 
 			_fout = _fout_qc
 
@@ -165,7 +160,6 @@ class _reader:
 	def __call__(self,start=None,end=None,mean_freq=None):
 
 		fout = self._run(start,end)
-		# _fout = self._run()
 
 		if mean_freq is not None:
 			fout = fout.resample(mean_freq).mean()

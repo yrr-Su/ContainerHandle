@@ -23,7 +23,9 @@ class reader(_reader):
 			_newkey['Total Conc.(#/cm)'] = 'total'
 			_newkey['Mode(nm)']	= 'mode'
 
-		return _df[_newkey.keys()].rename(_newkey,axis=1)
+			_df_idx = to_datetime(_df.index,errors='coerce')
+
+		return _df[_newkey.keys()].rename(_newkey,axis=1).set_index(_df_idx).loc[_df_idx.dropna()]
 
 	## QC data
 	def _QC(self,_df):
