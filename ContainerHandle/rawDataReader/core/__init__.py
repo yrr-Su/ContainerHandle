@@ -107,7 +107,7 @@ class _reader:
 		## read raw data
 		_df_con = None
 
-		for file in self.path.glob(f"*{self.meta['extension']}"):
+		for file in self.path.glob(self.meta['pattern']):
 			print(f"\r\t\treading {file.name}",end='')
 
 			_df = self._raw_reader(file)
