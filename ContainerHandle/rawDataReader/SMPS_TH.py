@@ -29,19 +29,18 @@ class reader(_reader):
 
 	## QC data
 	def _QC(self,_df):
-		
-		## 1-hr mean
-		_df_1hr = _df.resample('1h').mean().copy()
 
-		## 1-hr data clean
 		## mask out the data size lower than 7
-		_df_size = _df['total'].dropna().resample('1h').size().reindex(_df_1hr.index)
-		_df_1hr  = _df_1hr.mask(_df_size<7)
+		_df_size = _df['total'].dropna().resample('1h').size().resample(_df.index.freq).ffill()
+		_df = _df.mask(_df_size<7)
+
+		## remove total conc. lower than 2000
+		_df = _df.mask(_df['total']<2000)
 
 		## remove the bin over 400 nm which num. conc. larger than 4000 
-		_df_remv_ky = _df_1hr.keys()[:-2][_df_1hr.keys()[:-2]>=400.]
+		_df_remv_ky = _df.keys()[:-2][_df.keys()[:-2]>=400.]
 
-		_df_1hr[_df_remv_ky] = _df_1hr[_df_remv_ky].copy().mask(_df_1hr[_df_remv_ky]>4000.)
+		_df[_df_remv_ky] = _df[_df_remv_ky].copy().mask(_df[_df_remv_ky]>4000.)
 
-		return _df_1hr
+		return _df
 

@@ -98,7 +98,8 @@ class _reader:
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mPICKLE\033[0m file of {self.nam}")
 			with (self.path/self.pkl_nam).open('rb') as f:
 				_fout = pkl.load(f)
-				_start, _end = _start or _fout.index[0], _end or _fout.index[0]
+				breakpoint()
+				_start, _end = _start or _fout.index[0], _end or _fout.index[-1]
 
 			return _fout.reindex(date_range(_start,_end,freq=_fout.index.freq.copy()))
 		else: 

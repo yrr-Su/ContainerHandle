@@ -35,14 +35,14 @@ meta = {
 					  },
 
 		"AE33" : {
-				  "pattern"	  : "[!ST|!CT|!FV]*[!log]_AE33*.dat"
+				  "pattern"	  : "[!ST|!CT|!FV]*[!log]_AE33*.dat",
 				  "freq"	  : "1T",
 				  "deter_key" : "BC6",
 
 				  },
 
 		"AE43" : {
-				  "pattern"	  : "[!ST|!CT|!FV]*[!log]_AE43*.dat"
+				  "pattern"	  : "[!ST|!CT|!FV]*[!log]_AE43*.dat",
 				  "freq"	  : "1T",
 				  "deter_key" : "BC6",
 
