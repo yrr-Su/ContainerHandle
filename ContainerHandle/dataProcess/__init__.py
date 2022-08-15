@@ -34,10 +34,10 @@ class SizeDistr:
 					for _key, _val in _out.items():
 						_val.to_excel(f,sheet_name=f'{_key}')
 
-	def basic(self,df,nam):
+	def basic(self,df,nam,hybrid_bin_start_loc=None):
 		from ._SizeDistr import _basic
 
-		out = _basic(df)
+		out = _basic(df,hybrid_start_loc)
 		self._save_out(nam,out)
 
 		return out

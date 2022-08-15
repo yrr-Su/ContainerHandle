@@ -98,7 +98,6 @@ class _reader:
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mPICKLE\033[0m file of {self.nam}")
 			with (self.path/self.pkl_nam).open('rb') as f:
 				_fout = pkl.load(f)
-				breakpoint()
 				_start, _end = _start or _fout.index[0], _end or _fout.index[-1]
 
 			return _fout.reindex(date_range(_start,_end,freq=_fout.index.freq.copy()))
@@ -119,7 +118,7 @@ class _reader:
 
 		## reindex data and QC
 		_fout = self._raw_process(_df_con)
-		_start, _end = _start or _fout.index[0], _end or _fout.index[0]
+		_start, _end = _start or _fout.index[0], _end or _fout.index[-1]
 
 		_fout = _fout.reindex(date_range(_start,_end,freq=_fout.index.freq.copy()))
 		if self.qc:
@@ -131,12 +130,13 @@ class _reader:
 				_the_size  = len(_fout.resample('1h').mean().index)
 				_real_size = len(_fout[_key].resample('1h').mean().copy().dropna().index)
 				_QC_size   = len(_fout_qc[_key].resample('1h').mean().copy().dropna().index)
-				_acq_rate  = round((_real_size/_the_size)*100,2)
-				_yid_rate  = round((_QC_size/_real_size)*100,2)
+				_acq_rate  = round((_real_size/_the_size)*100,1)
+				_yid_rate  = round((_QC_size/_real_size)*100,1)
 
 				with (self.path/f'{self.nam}.log').open('a+') as f:
 					f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
 					f.write(f"{'-'*30}\n")
+					f.write(f"{_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
 					f.write(f"acquisition rate : {_acq_rate}%\n")
 					f.write(f'yield rate : {_yid_rate}%\n')
 					f.write(f"{'-'*30}\n")

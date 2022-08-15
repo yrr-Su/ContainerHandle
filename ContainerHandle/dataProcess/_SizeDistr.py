@@ -26,7 +26,7 @@ def _geometric_prop(_dp,_prop):
 	return _prop_t, _gmd.apply(n.exp), _gsd.apply(n.exp)
 
 
-def _basic(df):
+def _basic(df,hybrid):
 	import numpy as n
 
 	## get number conc. data and total, mode
@@ -35,8 +35,15 @@ def _basic(df):
 
 	out_dic = {}
 	## diameter
-	dp 		= dN.keys().to_numpy(float)
-	dlog_dp = n.diff(n.log10(dp)).mean()
+	dp = dN.keys().to_numpy(float)
+	if hybrid:
+		dlog_dp = n.diff(n.log10(dp)).mean()
+	else:
+		dlog_dp = n.ones(dp.size)
+		dlog_dp[:hybrid] = n.diff(n.log10(dp[:hybrid])).mean()
+		dlog_dp[hybrid:] = n.diff(n.log10(dp[hybrid:])).mean()
+
+
 	
 	## calculate normalize and non-normalize data
 	out_dic['number']  = dN*dlog_dp
