@@ -25,7 +25,7 @@ class reader(_reader):
 
 			## get new dataframe
 			_df = _df[_newkey.keys()].rename(_newkey,axis=1)
-			_df['total'] = _df[_newkey.values()[:-1]].sum(axis=1)*(n.diff(n.log(_df.keys()[3:54].to_numpy(float))).mean()).copy()
+			_df['total'] = _df[list(_newkey.values())[:-1]].sum(axis=1)*(n.diff(n.log(_df.keys()[:-1].to_numpy(float))).mean()).copy()
 
 			_df_idx = to_datetime(_df.index,errors='coerce')
 

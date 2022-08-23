@@ -88,6 +88,7 @@ class _reader:
 		_tm_index = self._time2whole(_df)
 
 		_out = _df.apply(to_numeric,errors='coerce').resample(self.meta['freq']).mean().reindex(_tm_index)
+
 		return _out
 
 	## read raw data
@@ -145,6 +146,8 @@ class _reader:
 				print(f'\t\tyield rate : {_yid_rate}%')
 
 			_fout = _fout_qc
+
+		_fout.index.name = 'time'
 
 		##=================================================================================================================
 		## dump pickle file

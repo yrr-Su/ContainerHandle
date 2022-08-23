@@ -37,7 +37,7 @@ class SizeDistr:
 	def basic(self,df,nam,hybrid_bin_start_loc=None):
 		from ._SizeDistr import _basic
 
-		out = _basic(df,hybrid_start_loc)
+		out = _basic(df,hybrid_bin_start_loc)
 		self._save_out(nam,out)
 
 		return out

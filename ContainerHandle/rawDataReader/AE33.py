@@ -18,8 +18,8 @@ class reader(_reader):
 			_df = _df[[40,43,46,49,52,55,58,32]]
 			_df.columns = ['BC1','BC2','BC3','BC4','BC5','BC6','BC7','Status']
 			
-			## remove data without Status=0
-			_df = _df.where(_df['Status']==0).copy()
+			## remove data without Status=0, 128(Not much filter tape), 256(Not much filter tape)
+			_df = _df.where((_df['Status']==0)|(_df['Status']==128)|(_df['Status']==256)).copy()
 
 			return _df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7']]
 

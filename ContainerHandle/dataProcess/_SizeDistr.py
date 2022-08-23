@@ -43,8 +43,6 @@ def _basic(df,hybrid):
 		dlog_dp[:hybrid] = n.diff(n.log10(dp[:hybrid])).mean()
 		dlog_dp[hybrid:] = n.diff(n.log10(dp[hybrid:])).mean()
 
-
-	
 	## calculate normalize and non-normalize data
 	out_dic['number']  = dN*dlog_dp
 	out_dic['surface'] = out_dic['number']*n.pi*dp**2
