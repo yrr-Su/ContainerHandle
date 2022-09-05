@@ -22,6 +22,7 @@ class _writter:
 	def _save_out(self,_nam,_out):
 
 		if self.path_out is not None:
+			self.path_out.mkdir(exist_ok=True,parents=True)
 			with (self.path_out/f'{_nam}.pkl').open('wb') as f:
 				pkl.dump(_out,f,protocol=pkl.HIGHEST_PROTOCOL)
 
@@ -36,7 +37,7 @@ class _writter:
 			if self.csv:
 				if type(_out)==dict():
 					_path_out = self.path_out/_nam
-					_path_out.mkdir()
+					_path_out.mkdir(exist_ok=True,parents=True)
 
 					for _key, _val in _out.items():
 						_val.to_csv(_path_out/f'{_key}.csv')
@@ -51,6 +52,8 @@ class scattering(_writter):
 		from ._scattering import _SAE
 
 		out = _SAE(df)
+		out.index.name = 'time'
+
 		self._save_out(nam,out)
 
 		return out
@@ -61,6 +64,8 @@ class absorption(_writter):
 		from ._absorption import _absCoe
 
 		out = _absCoe(df)
+		out.index.name = 'time'
+
 		self._save_out(nam,out)
 
 		return out
@@ -69,16 +74,20 @@ class absorption(_writter):
 		from ._absorption import _AAE
 
 		out = _AAE(df)
+		out.index.name = 'time'
+
 		self._save_out(nam,out)
 
 		return out
 
 class basic(_writter):
 	
-	def __call__(self,df_abs,df_sca,df_pm25,nam='basic'):
+	def __call__(self,df_abs,df_sca,df_mass=None,nam='basic'):
 		from ._extinction import _basic
 
-		out = _basic(df_abs,df_sca,df_pm25)
+		out = _basic(df_abs,df_sca,df_mass)
+		out.index.name = 'time'
+
 		self._save_out(nam,out)
 		
 		return out

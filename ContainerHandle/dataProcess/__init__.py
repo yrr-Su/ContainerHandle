@@ -26,6 +26,7 @@ class SizeDistr:
 	def _save_out(self,_nam,_out):
 
 		if self.path_out is not None:
+			self.path_out.mkdir(exist_ok=True,parents=True)
 			with (self.path_out/f'{_nam}.pkl').open('wb') as f:
 				pkl.dump(_out,f,protocol=pkl.HIGHEST_PROTOCOL)
 
@@ -38,6 +39,8 @@ class SizeDistr:
 		from ._SizeDistr import _basic
 
 		out = _basic(df,hybrid_bin_start_loc)
+		out.index.name = 'time'
+
 		self._save_out(nam,out)
 
 		return out

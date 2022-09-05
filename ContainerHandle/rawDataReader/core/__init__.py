@@ -1,7 +1,7 @@
 
 from datetime import datetime as dtm
 from datetime import timedelta as dtmdt
-from pandas import date_range, concat, to_numeric
+from pandas import date_range, concat, to_numeric, to_datetime
 from pathlib import Path
 from ..utils.config import meta
 import pickle as pkl
@@ -53,8 +53,8 @@ class _reader:
 		self.qc    = QC
 		self.csv   = csv_raw
 
-		self.pkl_nam = f'read_{self.nam.lower()}.pkl'
-		self.csv_nam = f'read_{self.nam.lower()}.csv'
+		self.pkl_nam = f'_read_{self.nam.lower()}.pkl'
+		self.csv_nam = f'_read_{self.nam.lower()}.csv'
 		
 		# print(f" from {_sta.strftime('%Y-%m-%d %X')} to {_fin.strftime('%Y-%m-%d %X')}")
 		# print('='*65)
@@ -109,6 +109,7 @@ class _reader:
 		_df_con = None
 
 		for file in self.path.glob(self.meta['pattern']):
+			if file==(self.path/self.csv_nam): continue
 			print(f"\r\t\treading {file.name}",end='')
 
 			_df = self._raw_reader(file)
@@ -119,7 +120,7 @@ class _reader:
 
 		## reindex data and QC
 		_fout = self._raw_process(_df_con)
-		_start, _end = _start or _fout.index[0], _end or _fout.index[-1]
+		_start, _end = to_datetime(_start) or _fout.index[0], to_datetime(_end) or _fout.index[-1]
 
 		_fout = _fout.reindex(date_range(_start,_end,freq=_fout.index.freq.copy()))
 		if self.qc:

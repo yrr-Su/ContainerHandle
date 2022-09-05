@@ -1,6 +1,6 @@
 
 
-def _basic(df_abs,df_sca,df_pm25):
+def _basic(df_abs,df_sca,df_mass):
 	from pandas import DataFrame
 	import numpy as n
 
@@ -17,9 +17,10 @@ def _basic(df_abs,df_sca,df_pm25):
 	df_out['SSA'] = df_out['sca']/df_out['ext']
 
 	## MAE, MSE, MEE
-	df_out['MAE'] = df_out['abs']/df_pm25
-	df_out['MSE'] = df_out['sca']/df_pm25
-	df_out['MEE'] = df_out['MSE']+df_out['MAE']
+	if df_mass is not None:
+		df_out['MAE'] = df_out['abs']/df_mass
+		df_out['MSE'] = df_out['sca']/df_mass
+		df_out['MEE'] = df_out['MSE']+df_out['MAE']
 
 	## other
 	df_out['eBC'] = df_abs['eBC']
