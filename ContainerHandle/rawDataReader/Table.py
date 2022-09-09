@@ -10,11 +10,16 @@ from pathlib import Path
 
 class reader(_reader):
 
-	nam = 'Meteo'
+	nam = 'Table'
 
 	def _raw_reader(self,_file):
 		
 		with (_file).open('r',encoding='utf-8',errors='ignore') as f:
-			_df = read_csv(f,parse_dates=['Time'],index_col='Time',na_values=['-'])
+
+			_time_idx = f.readlines(1)[0][:-2].lower().split(',').index('time')
+
+			f.seek(0)
+
+			_df = read_csv(f,parse_dates=[_time_idx],index_col=_time_idx,na_values=['-'])
 
 		return _df

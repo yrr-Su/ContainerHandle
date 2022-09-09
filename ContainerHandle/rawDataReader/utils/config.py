@@ -13,7 +13,7 @@ meta = {
 
 				  },
 
-		"Meteo" : {
+		"Table" : {
 				   "pattern"   : "*.csv",
 				   "freq"	   : "1h",
 				   "deter_key" : None,
