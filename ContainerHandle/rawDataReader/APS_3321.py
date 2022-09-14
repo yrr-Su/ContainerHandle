@@ -21,11 +21,11 @@ class reader(_reader):
 			_newkey = {}
 			for _k in _key: 
 				_newkey[_k] = float(_k).__round__(4)
-			_newkey['Mode(m)'] = 'mode'
+			# _newkey['Mode(m)'] = 'mode'
 
 			## get new dataframe
 			_df = _df[_newkey.keys()].rename(_newkey,axis=1)
-			_df['total'] = _df[list(_newkey.values())[:-1]].sum(axis=1)*(n.diff(n.log(_df.keys()[:-1].to_numpy(float))).mean()).copy()
+			# _df['total'] = _df[list(_newkey.values())[:-1]].sum(axis=1)*(n.diff(n.log(_df.keys()[:-1].to_numpy(float))).mean()).copy()
 
 			_df_idx = to_datetime(_df.index,errors='coerce')
 
@@ -35,6 +35,7 @@ class reader(_reader):
 	def _QC(self,_df):
 
 		## mask out the data size lower than 7
+		_df['total'] = _df.sum(axis=1)*(n.diff(n.log(_df.keys().to_numpy(float)))).mean()
 		_df_size = _df['total'].dropna().resample('1h').size().resample(_df.index.freq).ffill()
 		_df = _df.mask(_df_size<7)
 
@@ -49,4 +50,4 @@ class reader(_reader):
 		# _df_1hr[_df_remv_ky] = _df_1hr[_df_remv_ky].copy().mask(_df_1hr[_df_remv_ky]>1.)
 		# """
 	
-		return _df
+		return _df[_df.keys()[:-1]]

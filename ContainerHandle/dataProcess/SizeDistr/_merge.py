@@ -153,7 +153,7 @@ def _merge_SMPS_APS(df_smps,df_aps,aps_unit,shift_mode,smps_overlap_lowbound,aps
 
 	## get data, remove 'total' and 'mode'
 	## set to the same units
-	smps, aps = df_smps[df_smps.keys()[:-2]], df_aps[df_aps.keys()[:-2]]
+	smps, aps = df_smps, df_aps
 	smps.columns = smps.keys().to_numpy(float)
 	aps.columns  = aps.keys().to_numpy(float)
 
@@ -171,11 +171,11 @@ def _merge_SMPS_APS(df_smps,df_aps,aps_unit,shift_mode,smps_overlap_lowbound,aps
 	density.columns = ['density']
 
 	## add total and mode
-	merge_total = merge_data.sum(axis=1,min_count=1).copy()
-	merge_mode  = merge_data.idxmax(axis=1).astype(float).copy()
+	# merge_total = merge_data.sum(axis=1,min_count=1).copy()
+	# merge_mode  = merge_data.idxmax(axis=1).astype(float).copy()
 
-	merge_data['total'] = merge_total
-	merge_data['mode']  = merge_mode
+	# merge_data['total'] = merge_total
+	# merge_data['mode']  = merge_mode
 
 	## out
 	out_dic = {

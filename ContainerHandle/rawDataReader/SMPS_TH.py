@@ -20,8 +20,8 @@ class reader(_reader):
 			for _k in _key: 
 				_newkey[_k] = float(_k).__round__(4)
 
-			_newkey['Total Conc.(#/cm)'] = 'total'
-			_newkey['Mode(nm)']	= 'mode'
+			# _newkey['Total Conc.(#/cm)'] = 'total'
+			# _newkey['Mode(nm)']	= 'mode'
 
 			_df_idx = to_datetime(_df.index,errors='coerce')
 
@@ -31,6 +31,7 @@ class reader(_reader):
 	def _QC(self,_df):
 
 		## mask out the data size lower than 7
+		_df['total'] = _df.sum(axis=1)*(n.diff(n.log(_df.keys().to_numpy(float)))).mean()
 		_df_size = _df['total'].dropna().resample('1h').size().resample(_df.index.freq).ffill()
 		_df = _df.mask(_df_size<7)
 
@@ -42,5 +43,5 @@ class reader(_reader):
 
 		_df[_df_remv_ky] = _df[_df_remv_ky].copy().mask(_df[_df_remv_ky]>4000.)
 
-		return _df
+		return _df[_df.keys()[:-1]]
 

@@ -32,10 +32,8 @@ def _basic(df,hybrid,unit):
 	from pandas import DataFrame
 
 	## get number conc. data and total, mode
-	dN 	   = df[df.keys()[:-2]].copy()
+	dN = df
 	dN.columns = dN.keys().to_numpy(float)
-
-	df_oth = df[df.keys()[-2:]].copy()
 
 	out_dic = {}
 	## diameter
@@ -76,6 +74,8 @@ def _basic(df,hybrid,unit):
 	out_dic['mode'] = df_mode
 	
 	## total, GMD and GSD
+	df_oth = DataFrame(index=dN.index)
+
 	df_oth['total'], df_oth['GMD'], df_oth['GSD'] = _geometric_prop(dp,out_dic['number'])
 	df_oth['total_surf'], df_oth['GMD_surf'], df_oth['GSD_surf'] = _geometric_prop(dp,out_dic['surface'])
 	df_oth['total_volume'], df_oth['GMD_volume'], df_oth['GSD_volume'] = _geometric_prop(dp,out_dic['volume'])
