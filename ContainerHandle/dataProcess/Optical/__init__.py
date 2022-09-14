@@ -1,70 +1,36 @@
-import pickle as pkl
-from pandas import ExcelWriter
+
+from ..core import _writter
+from datetime import datetime as dtm
 
 __all__ = [
-			'scattering',
-			'absorption',
-			'basic',
 
-
+			'Optical',
 
 	]
 
-
-class _writter:
-
-	def __init__(self,path_out=None,excel=True,csv=False):
-
-		self.path_out = path_out
-		self.excel	  = excel
-		self.csv	  = csv
-
-	def _save_out(self,_nam,_out):
-
-		if self.path_out is not None:
-			self.path_out.mkdir(exist_ok=True,parents=True)
-			with (self.path_out/f'{_nam}.pkl').open('wb') as f:
-				pkl.dump(_out,f,protocol=pkl.HIGHEST_PROTOCOL)
-
-			if self.excel:		
-				with ExcelWriter(self.path_out/f'{_nam}.xlsx') as f:
-					if type(_out)==dict():
-						for _key, _val in _out.items():
-							_val.to_excel(f,sheet_name=f'{_key}')
-					else:
-						_out.to_excel(f,sheet_name=f'{_nam}')
-
-			if self.csv:
-				if type(_out)==dict():
-					_path_out = self.path_out/_nam
-					_path_out.mkdir(exist_ok=True,parents=True)
-
-					for _key, _val in _out.items():
-						_val.to_csv(_path_out/f'{_key}.csv')
-				else:
-					_out.to_csv(self.path_out/f'{_nam}.csv')
-
-
-
-class scattering(_writter):
-
+class Optical(_writter):
+	
+	## scatter
 	def SAE(self,df,nam='SAE'):
 		from ._scattering import _SAE
 
+		print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Process \033[92mOptical - SAE\033[0m -> {nam}")
+
 		out = _SAE(df)
-		out.index.name = 'time'
+		out = self._pre_process(out)
 
 		self._save_out(nam,out)
 
 		return out
-
-class absorption(_writter):
-
-	def absCoe(self,df,nam='absCoe'):
+	
+	## absorption
+	def absCoe(self,df,abs_band=550,nam='absCoe'):
 		from ._absorption import _absCoe
 
-		out = _absCoe(df)
-		out.index.name = 'time'
+		print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Process \033[92mOptical - absCoe\033[0m -> {nam}")
+
+		out = _absCoe(df,abs_band)
+		out = self._pre_process(out)
 
 		self._save_out(nam,out)
 
@@ -73,20 +39,23 @@ class absorption(_writter):
 	def AAE(self,df,nam='AAE'):
 		from ._absorption import _AAE
 
+		print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Process \033[92mOptical - AAE\033[0m -> {nam}")
+
 		out = _AAE(df)
-		out.index.name = 'time'
+		out = self._pre_process(out)
 
 		self._save_out(nam,out)
 
 		return out
 
-class basic(_writter):
-	
-	def __call__(self,df_abs,df_sca,df_mass=None,nam='basic'):
+	## extinction
+	def basic(self,df_abs,df_sca,df_ec=None,df_mass=None,nam='opt_basic'):
 		from ._extinction import _basic
 
-		out = _basic(df_abs,df_sca,df_mass)
-		out.index.name = 'time'
+		print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Process \033[92mOptical - basic\033[0m -> {nam}")
+
+		out = _basic(df_abs,df_sca,df_ec,df_mass)
+		out = self._pre_process(out)
 
 		self._save_out(nam,out)
 		

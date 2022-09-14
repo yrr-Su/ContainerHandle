@@ -1,7 +1,7 @@
 
 
 
-def _absCoe(df):
+def _absCoe(df,abs_band):
 	import numpy as n
 	from scipy.optimize import curve_fit
 
@@ -11,7 +11,7 @@ def _absCoe(df):
 		func = lambda _x, _sl, _int : _sl*_x+_int
 		popt, pcov = curve_fit(func,band,__df)
 
-		return func(550,*popt)
+		return func(abs_band,*popt)
 
 
 	MAE = n.array([18.47,14.54,13.14,11.58,10.35,7.77,7.19])*1e-3
