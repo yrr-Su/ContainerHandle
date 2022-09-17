@@ -13,17 +13,9 @@ class reader(_reader):
 
 	def _raw_reader(self,_file):
 
-		## pre-process data as csv file
-		with (_file).open('r',encoding='utf-8',errors='ignore') as f_rd, \
-			 (self.path/f'temp.csv').open('w',encoding='utf-8',errors='ignore') as f_wri:
-
-			for _l in f_rd:
-				f_wri.write(_l.rstrip('\n')+','*(11-_l.split(',').__len__())+'\n')
-
-		## read csv file
-		with (self.path/f'temp.csv').open('r',encoding='utf-8',errors='ignore') as f:
-
+		with (_file).open('r',encoding='utf-8',errors='ignore') as f:
 			_df = read_csv(f,header=None,names=range(11))
+		
 			_df_grp = _df.groupby(0)
 
 			## T : time
@@ -45,9 +37,13 @@ class reader(_reader):
 
 			## Y : state
 			## col : 5 RH
-			_df_out['RH'] = _df_grp.get_group('Y')[5].values
+			_df_st = _df_grp.get_group('Y')
+			_df_out['RH'] = _df_st[5].values
+			_df_out['status'] = _df_st[9].values
 
-		return _df_out
+			_df_out.mask(_df_out['status']!=0) ## 0000 -> numeric to 0
+
+		return _df_out[['B','G','R','BB','BG','BR','RH']]
 
 	## QC data
 	def _QC(self,_df):

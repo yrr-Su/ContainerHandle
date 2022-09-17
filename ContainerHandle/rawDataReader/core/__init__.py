@@ -76,7 +76,7 @@ class _reader:
 	## get time from df and set time to whole time to create time index
 	def _time2whole(self,_df):
 		## set time index to whole time
-		_st, _ed  = _df.index[[0,-1]]
+		_st, _ed  = _df.index.sort_values()[[0,-1]]
 		_tm_index = date_range(_st.strftime('%Y%m%d %H00'),
 							  (_ed+dtmdt(hours=1)).strftime('%Y%m%d %H00'),
 							  freq=self.meta['freq'])
@@ -127,24 +127,35 @@ class _reader:
 			_fout_qc = self._QC(_fout)
 
 			if self.meta['deter_key'] is not None:
-				_key = self.meta['deter_key']
 
-				_the_size  = len(_fout.resample('1h').mean().index)
-				_real_size = len(_fout[_key].resample('1h').mean().copy().dropna().index)
-				_QC_size   = len(_fout_qc[_key].resample('1h').mean().copy().dropna().index)
-				_acq_rate  = round((_real_size/_the_size)*100,1)
-				_yid_rate  = round((_QC_size/_real_size)*100,1)
+				_drop_how = 'any'
+				_the_size = len(_fout.resample('1h').mean().index)
 
-				with (self.path/f'{self.nam}.log').open('a+') as f:
-					f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
-					f.write(f"{'-'*30}\n")
-					f.write(f"{_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
-					f.write(f"acquisition rate : {_acq_rate}%\n")
-					f.write(f'yield rate : {_yid_rate}%\n')
-					f.write(f"{'-'*30}\n")
+				_f = (self.path/f'{self.nam}.log').open('a+')
+				_f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
+				_f.write(f"{'-'*30}\n")
+				_f.write(f"{_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
 
-				print(f'\n\t\tacquisition rate : {_acq_rate}%')
-				print(f'\t\tyield rate : {_yid_rate}%')
+				for _nam, _key in self.meta['deter_key'].items():
+
+					if _key==['all']: 
+						_key, _drop_how = _fout_qc.keys(), 'all'
+
+					_real_size = len(_fout[_key].resample('1h').mean().copy().dropna(how=_drop_how).index)
+					_QC_size   = len(_fout_qc[_key].resample('1h').mean().copy().dropna(how=_drop_how).index)
+					_acq_rate  = round((_real_size/_the_size)*100,1)
+					_yid_rate  = round((_QC_size/_real_size)*100,1)
+
+					_f.write(f'{_nam} : \n')
+					_f.write(f"\tacquisition rate : {_acq_rate}%\n")
+					_f.write(f'\tyield rate : {_yid_rate}%\n')
+
+					print(f'\n\t\t{_nam} : ')
+					print(f'\t\t\tacquisition rate : {_acq_rate}%')
+					print(f'\t\t\tyield rate : {_yid_rate}%')
+
+				_f.write(f"{'-'*30}\n")
+				_f.close()
 
 			_fout = _fout_qc
 

@@ -24,11 +24,11 @@ class reader(_reader):
 			# _newkey['Mode(nm)']	= 'mode'
 
 			_df_idx = to_datetime(_df.index,errors='coerce')
-
 		return _df[_newkey.keys()].rename(_newkey,axis=1).set_index(_df_idx).loc[_df_idx.dropna()]
 
 	## QC data
 	def _QC(self,_df):
+		import numpy as n
 
 		## mask out the data size lower than 7
 		_df['total'] = _df.sum(axis=1)*(n.diff(n.log(_df.keys().to_numpy(float)))).mean()

@@ -7,10 +7,12 @@ import pickle as pkl
 
 from .Optical import Optical
 from .SizeDistr import SizeDistr
+from .Chemistry import Chemistry
 
 __all__ = [
 			'Optical',
 			'SizeDistr',
+			'Chemistry',
 
 	]
 

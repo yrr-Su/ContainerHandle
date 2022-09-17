@@ -29,7 +29,7 @@ def _geometric_prop(_dp,_prop):
 def _basic(df,hybrid,unit):
 	
 	import numpy as n
-	from pandas import DataFrame
+	from pandas import DataFrame, concat
 
 	## get number conc. data and total, mode
 	dN = df
@@ -54,8 +54,8 @@ def _basic(df,hybrid,unit):
 	out_dic['surface_norm'] = out_dic['number_norm']*n.pi*dp**2
 	out_dic['volume_norm']  = out_dic['number_norm']*n.pi*(dp**3)/6
 
-	## mode 
-	df_mode = DataFrame(index=dN.index)
+	## size range mode process 
+	df_oth = DataFrame(index=dN.index)
 
 	bound = n.array([(11,25),(25,100),(100,1e3),(1e3,2.5e3),])
 	if unit=='um':
@@ -63,23 +63,26 @@ def _basic(df,hybrid,unit):
 
 	for _nam, _range in zip(['Nucleation','Aitken','Accumulation','Coarse'],bound):
 
-		_dia = dp[(dp>_range[0])&(dp<_range[-1])]
+		_dia = dp[(dp>=_range[0])&(dp<_range[-1])]
 
 		if ~_dia.any(): continue
 		
-		_dN = dN[_dia].copy()
-		df_mode[f'{_nam}_mode'] = _dN.idxmax(axis=1)
-		df_mode[f'{_nam}_conc'] = _dN.max(axis=1)
-
-	out_dic['mode'] = df_mode
+		_dN = out_dic['number'][_dia].copy()
+		df_oth[f'{_nam}_mode'] = _dN.idxmax(axis=1)
+		df_oth[f'{_nam}_TNC']  = _dN.sum(axis=1,min_count=1)
 	
 	## total, GMD and GSD
-	df_oth = DataFrame(index=dN.index)
-
 	df_oth['total'], df_oth['GMD'], df_oth['GSD'] = _geometric_prop(dp,out_dic['number'])
 	df_oth['total_surf'], df_oth['GMD_surf'], df_oth['GSD_surf'] = _geometric_prop(dp,out_dic['surface'])
 	df_oth['total_volume'], df_oth['GMD_volume'], df_oth['GSD_volume'] = _geometric_prop(dp,out_dic['volume'])
 
+	## mode
+	df_oth['mode']  	   = out_dic['number'].idxmax(axis=1)
+	df_oth['mode_surface'] = out_dic['surface'].idxmax(axis=1)
+	df_oth['mode_volume']  = out_dic['volume'].idxmax(axis=1)
+
+	## out
 	out_dic['other'] = df_oth
+	
 
 	return out_dic

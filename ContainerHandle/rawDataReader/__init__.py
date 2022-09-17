@@ -7,6 +7,9 @@ __all__ = [
 			'SMPS_TH',
 			'AE33',
 			'AE43',
+			'TEOM',
+			'OCEC_RES',
+			'OCEC_LCRES',
 
 
 
