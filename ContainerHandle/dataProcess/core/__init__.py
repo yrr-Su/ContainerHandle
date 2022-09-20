@@ -23,27 +23,36 @@ class _writter:
 
 	def _save_out(self,_nam,_out):
 
-		if self.path_out is not None:
-			self.path_out.mkdir(exist_ok=True,parents=True)
-			with (self.path_out/f'{_nam}.pkl').open('wb') as f:
-				pkl.dump(_out,f,protocol=pkl.HIGHEST_PROTOCOL)
+		_check = True
+		while _check:
 
-			if self.excel:
-				from pandas import ExcelWriter
-				with ExcelWriter(self.path_out/f'{_nam}.xlsx') as f:
-					if type(_out)==dict:
-						for _key, _val in _out.items():
-							_val.to_excel(f,sheet_name=f'{_key}')
-					else:
-						_out.to_excel(f,sheet_name=f'{_nam}')
+			try:
+				if self.path_out is not None:
+					self.path_out.mkdir(exist_ok=True,parents=True)
+					with (self.path_out/f'{_nam}.pkl').open('wb') as f:
+						pkl.dump(_out,f,protocol=pkl.HIGHEST_PROTOCOL)
 
-			if self.csv:
-				if type(_out)==dict:
-					_path_out = self.path_out/_nam
-					_path_out.mkdir(exist_ok=True,parents=True)
+					if self.excel:
+						from pandas import ExcelWriter
+						with ExcelWriter(self.path_out/f'{_nam}.xlsx') as f:
+							if type(_out)==dict:
+								for _key, _val in _out.items():
+									_val.to_excel(f,sheet_name=f'{_key}')
+							else:
+								_out.to_excel(f,sheet_name=f'{_nam}')
 
-					for _key, _val in _out.items():
-						_val.to_csv(_path_out/f'{_key}.csv')
-				else:
-					_out.to_csv(self.path_out/f'{_nam}.csv')
+					if self.csv:
+						if type(_out)==dict:
+							_path_out = self.path_out/_nam
+							_path_out.mkdir(exist_ok=True,parents=True)
 
+							for _key, _val in _out.items():
+								_val.to_csv(_path_out/f'{_key}.csv')
+						else:
+							_out.to_csv(self.path_out/f'{_nam}.csv')
+
+				_check = False
+
+			except PermissionError as _err:
+				print('\n',_err)
+				input('\t\t\33[41m Please Close The File And Press "Enter" \33[0m\n')

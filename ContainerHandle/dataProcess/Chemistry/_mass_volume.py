@@ -1,18 +1,7 @@
 
 
 
-
-
-
-
-
-
 from pandas import date_range, concat, DataFrame, to_numeric
-
-
-# def _mass_cal(df_am,df):
-
-
 
 
 def _basic(df_che,df_ref,df_water,nam_lst):
