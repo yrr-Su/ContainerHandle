@@ -63,7 +63,7 @@ meta = {
 					},
 
 		"OCEC_RES" : {
-					    "pattern"   : "*[!LC]Res.csv",
+					    "pattern"   : "*[!LC|!Blanks]Res.csv",
 					    "freq"	    : "1h",
 					    "deter_key" : None,
 

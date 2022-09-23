@@ -24,13 +24,13 @@ class Chemistry(_writter):
 		return out
 
 	## OCEC
-	def OCEC_basic(self,df_lcres,df_res,df_mass=None,ocec_ratio_month=1,hr_lim=200,
+	def OCEC_basic(self,df_lcres,df_res,df_mass=None,ocec_ratio=None,ocec_ratio_month=1,hr_lim=200,
 				   least_square_range=(0.1,2.5,0.1),nam='ocec_basic'):
 		from ._ocec import _basic
 
 		print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Process \033[92mChemistry - OC/EC basic\033[0m -> {nam}")
 
-		out = _basic(df_lcres,df_res,df_mass,ocec_ratio_month,hr_lim,least_square_range)
+		out = _basic(df_lcres,df_res,df_mass,ocec_ratio,ocec_ratio_month,hr_lim,least_square_range)
 		out = self._pre_process(out)
 
 		self._save_out(nam,out)
