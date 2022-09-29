@@ -14,13 +14,13 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 	mol_A, mol_S, mol_N  = df_all['NH4+']/18, df_all['SO42-']/96, df_all['NO3-']/62
 	df_all['status'] = (mol_A)/(2*mol_S+mol_N)
 
-	convert_nam = { 'AS'   : 'SO42-',
-					'AN'   : 'NO3-',
-					'OM'   : 'OC',
-					'Soil' : 'Fe',
-					'SS'   : 'Na+',
-					'EC'   : 'EC',
-				}
+	convert_nam = {'AS'   : 'SO42-',
+				   'AN'   : 'NO3-',
+				   'OM'   : 'OC',
+				   'Soil' : 'Fe',
+				   'SS'   : 'Na+',
+				   'EC'   : 'EC',
+				   }
 
 	mass_coe = {'AS'   : 1.375,
 				'AN'   : 1.29,
@@ -38,6 +38,15 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 				'EC'   : 1.5,
 				}
 
+	RI_coe	 = {'ALWC' : 1.333+0j,
+			    'AS'   : 1.53+0j,
+			    'AN'   : 1.55+0j,
+			    'OM'   : 1.55+0.0179j,
+			    'Soil' : 1.56+0.01j,
+			    'SS'   : 1.54+0j,
+			    'EC'   : 1.80+0.54j
+				}
+
 	## mass
 	## NH4 Enough
 	df_mass   = DataFrame()
@@ -48,7 +57,6 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 
 	## NH4 Deficiency
 	defic_idx = df_all['status']<1
-	# defic_idx = df_all['status']>5
 
 	if defic_idx.any():
 		residual = mol_A-2*mol_S
@@ -75,18 +83,36 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 			_cond = _status&(mol_A>2*mol_S)
 			df_mass.loc[_cond,'AS'] = mol_S.loc[_cond]*132
 
+	df_mass = df_mass.dropna()
+
 	## volume
 	df_vol = DataFrame()
 	for _vol_nam, _coe in vol_coe.items():
 		df_vol[_vol_nam] = df_mass[_vol_nam]/_coe
-	
-	if df_water:
+
+	if df_water is not None:
 		df_vol['ALWC'] = df_water
+		df_vol = df_vol.dropna()
+		df_vol['total_wet'] = df_vol.sum(axis=1)
+
+	df_vol['total_dry'] = df_vol[vol_coe.keys()].sum(axis=1)
+
+	## refractive index
+	df_RI = DataFrame()
+
+	for _ky, _df in df_vol.items():
+		if 'total' in _ky: continue
+		df_RI[_ky] = (_df*RI_coe[_ky])
+	
+	if df_water is not None:
+		df_RI['RI_wet'] = (df_RI/df_vol['total_wet'].to_frame().values).sum(axis=1)
+
+	df_RI['RI_dry'] = (df_RI[vol_coe.keys()]/df_vol['total_dry'].to_frame().values).sum(axis=1)
 
 	## out
 	out = { 'mass'   : df_mass.reindex(index),
 			'volume' : df_vol.reindex(index),
-
+			'RI' 	 : df_RI[['RI_dry','RI_wet']].reindex(index),
 			}
 
 	return out
@@ -108,52 +134,6 @@ def mass_ratio(_df):
             _df[f'{_species}_ratio'] = _val / _df['PM25'].__round__(3)
 
     return _df['others':].drop(labels=['PM25_ratio', 'total_mass_ratio'])
-
-
-def volume(_df):
-    _df['AS_volume']   = (_df['AS_mass'] / 1.76).__round__(3)
-    _df['AN_volume']   = (_df['AN_mass'] / 1.73).__round__(3)
-    _df['OM_volume']   = (_df['OM_mass'] / 1.4).__round__(3)
-    _df['Soil_volume'] = (_df['Soil_mass'] / 2.6).__round__(3)
-    _df['SS_volume']   = (_df['SS_mass'] / 2.16).__round__(3)
-    _df['EC_volume']   = (_df['EC_mass'] / 1.5).__round__(3)
-    _df['ALWC_volume'] = (_df['ALWC'] / 1).__round__(3)
-    _df['total_volume'] = sum(_df['AS_volume':'ALWC_volume']).__round__(3)
-
-    V_dry = sum(_df['AS_volume':'EC_volume']).__round__(3)
-    V_wet = _df['total_volume']
-    _df['gRH'] = (V_wet**(1/3)) / (V_dry**(1/3))
-
-    for _val, _species in zip(_df['AS_volume':'ALWC_volume'].values, _df['AS_volume':'ALWC_volume'].index):
-        _df[f'{_species}_ratio'] = _val / _df['total_volume'].__round__(3)
-
-    _df['n_amb'] = (1.53 * _df['AS_volume_ratio']+ \
-                   1.55 * _df['AN_volume_ratio']+\
-                   1.55 * _df['OM_volume_ratio']+\
-                   1.56 * _df['Soil_volume_ratio']+\
-                   1.54 * _df['SS_volume_ratio']+\
-                   1.8 * _df['EC_volume_ratio']+\
-                   1.333 * _df['ALWC_volume_ratio']).__round__(4)
-
-    _df['k_amb'] = (0.00*_df['OM_volume_ratio']+\
-                   0.01*_df['Soil_volume_ratio']+\
-                   0.54*_df['EC_volume_ratio']).__round__(4)
-
-    _df['n_dry'] = ((1.53 * _df['AS_volume_ratio']+ \
-                   1.55 * _df['AN_volume_ratio']+\
-                   1.55 * _df['OM_volume_ratio']+\
-                   1.56 * _df['Soil_volume_ratio']+\
-                   1.54 * _df['SS_volume_ratio']+\
-                   1.8 * _df['EC_volume_ratio']) * (1/(1-_df['ALWC_volume_ratio']))).__round__(4)
-
-    _df['k_dry'] = ((0.00*_df['OM_volume_ratio']+\
-                    0.01*_df['Soil_volume_ratio']+\
-                    0.54*_df['EC_volume_ratio']) * (1/(1-_df['ALWC_volume_ratio']))).__round__(4)
-
-    return _df['AS_volume':]
-# '''
-
-
 
 
 

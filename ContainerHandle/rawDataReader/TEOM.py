@@ -40,13 +40,13 @@ class reader(_reader):
 		_df_idx = _df.index.copy()
 
 		## remove negative value
-		_df = _df.where(_df.noise<0.01)[['PM_NV','PM_Total']].mask((_df<0).copy()).dropna()
+		_df = _df.where(_df.noise<0.01)[['PM_NV','PM_Total']].mask((_df<0).copy())
 
 		## QC data in 1 hr
 		## remove data where size < 8 in 1-hr
 		for _key in ['PM_Total','PM_NV']:
 
-			_size = _df[_key].resample('1h').size().reindex(_df_idx).ffill().copy()
+			_size = _df[_key].dropna().resample('1h').size().reindex(_df_idx).ffill().copy()
 			_df[_key] = _df[_key].mask(_size<8)
 
 		return _df.reindex(_df_idx)

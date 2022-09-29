@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import pickle as pkl
+from datetime import datetime as dtm
 
 class _writter:
 
@@ -56,3 +57,25 @@ class _writter:
 			except PermissionError as _err:
 				print('\n',_err)
 				input('\t\t\33[41m Please Close The File And Press "Enter" \33[0m\n')
+
+def _run_process(*_ini_set):
+	def _decorator(_prcs_fc):
+		def _wrap(*arg,**kwarg):
+
+			_fc_name, _nam = _ini_set
+
+			if kwarg.get('nam') is not None:
+				_nam = kwarg.pop('nam')			
+
+			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Process \033[92m{_fc_name}\033[0m -> {_nam}")
+
+			_class, _out = _prcs_fc(*arg,**kwarg)
+			_out = _class._pre_process(_out)
+
+			_class._save_out(_nam,_out)
+
+			return _out
+		return _wrap
+	return _decorator
+
+
