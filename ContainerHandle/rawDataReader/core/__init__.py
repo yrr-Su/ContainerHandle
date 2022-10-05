@@ -106,15 +106,20 @@ class _reader:
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mRAW DATA\033[0m of {self.nam} and process it")
 		##=================================================================================================================
 		## read raw data
-		_df_con = None
+		_df_con, _f_list = None, list(self.path.glob(self.meta['pattern']))
 
-		for file in self.path.glob(self.meta['pattern']):
+		if len(_f_list)==0: 
+			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : \033[31mNo File in {self.path} Could Read, Please Check Out the Current Path\033[0m")
+			return None
+
+		for file in _f_list:
 			if file==(self.path/self.csv_nam): continue
 			print(f"\r\t\treading {file.name}",end='')
 
 			_df = self._raw_reader(file)
 			## concat the concated list
 			if _df is not None:
+
 				_df_con = concat([_df_con,_df]) if _df_con is not None else _df
 		print()
 

@@ -53,9 +53,10 @@ class Optical(_writter):
 		return self, out
 
 	@_run_process('Optical - IMPROVE','IMPROVE')
-	def IMPROVE(self,):
-		from ._IMPROVE import _IMPROVE
+	def IMPROVE(self,df_mass,df_RH,method='revised'):
+		# _fc = __import__(f'_IMPROVE._{method}')
+		from ._IMPROVE import _revised
 
-		out = _IMPROVE()
+		out = _revised(df_mass,df_RH)
 
 		return self, out
