@@ -3,7 +3,7 @@
 
 
 from datetime import datetime as dtm
-from pandas import DataFrame
+from pandas import DataFrame, to_datetime
 # from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline as unvpline, interp1d
 import numpy as n
@@ -106,7 +106,7 @@ def _overlap_fitting(_smps_ori,_aps_ori,_smps_lb,_aps_hb):
 	_shift_factor_out = DataFrame(_shift_factor.loc[_dropna_idx].values[range(len(_dropna_idx)),_least_squ_idx.values],
 								  index=_dropna_idx).reindex(_dt_indx)
 
-	return _shift_factor_out
+	return _shift_factor_out, (DataFrame(_coeA,index=_dt_indx), DataFrame(_coeB,index=_dt_indx))
 
 
 ## Remove big shift data ()
@@ -114,8 +114,8 @@ def _overlap_fitting(_smps_ori,_aps_ori,_smps_lb,_aps_hb):
 def _shift_data_process(_shift):
 	print(f"\t\t{dtm.now().strftime('%m/%d %X')} : \033[92mshift-data quality control\033[0m")
 
-	_shift = _shift.mask((~n.isfinite(_shift))|(_shift>2))
 	_rho = _shift**2
+	_shift = _shift.mask((~n.isfinite(_shift))|(_rho>2)|(_rho<0.3))
 
 	_qc_index = _shift.mask((_rho<0.6)|(_shift.isna())).dropna().index
 
@@ -126,25 +126,38 @@ def _shift_data_process(_shift):
 ## Create merge data
 ##  shift all smps bin and remove the aps bin which smaller than the latest old smps bin
 ## Return : merge bins, merge data, density
-def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb):
+def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb,_coe):
 	print(f"\t\t{dtm.now().strftime('%m/%d %X')} : \033[92mcreate merge data\033[0m")
 
 	_ori_idx = _smps_ori.index
 	_merge_idx = _smps_ori.loc[_aps_ori.dropna(how='all').index].dropna(how='all').index
+
+
+	_uni_idx, _count = n.unique(n.hstack((_smps_ori.dropna(how='all').index,_aps_ori.dropna(how='all').index,
+							    _shift_ori.dropna(how='all').index)),return_counts=True)
+								
+	_merge_idx = to_datetime(n.unique(_uni_idx[_count==3]))
+
 	_smps, _aps, _shift = _smps_ori.loc[_merge_idx], _aps_ori.loc[_merge_idx], _shift_ori.loc[_merge_idx].values
 
 	## parameter
-	_cntr = (_smps_lb+_aps_hb)/2
+	_coeA, _coeB = _coe[0].loc[_merge_idx], _coe[1].loc[_merge_idx]
 	_smps_key, _aps_key = _smps.keys()._data.astype(float), _aps.keys()._data.astype(float)
 
+	_test = 1000
+
+	# _cntr = (_smps_lb+_aps_hb)/2
+	_cntr = _test
+	_bin_lb = _smps_key[-1]
+1
 	## make shift bins
 	_smps_bin = n.full(_smps.shape,_smps_key)
 	_aps_bin  = n.full(_aps.shape,_aps_key)
 	# _std_bin  = _smps_key.tolist()+_aps_key[_aps_key>_smps_key[-1]].tolist()
 	_std_bin  = n.geomspace(_smps_key[0],_aps_key[-1],230)
-	_std_bin_merge  = _std_bin[(_std_bin<_cntr)&(_std_bin>_smps_lb)]
-	_std_bin_inte1  = _std_bin[_std_bin<=_smps_lb]
-	_std_bin_inte2  = _std_bin[_std_bin>=_cntr]
+	_std_bin_merge = _std_bin[(_std_bin<_cntr)&(_std_bin>_bin_lb)]
+	_std_bin_inte1 = _std_bin[_std_bin<=_bin_lb]
+	_std_bin_inte2 = _std_bin[_std_bin>=_cntr]
 
 	if _shift_mode=='mobility':
 		_aps_bin /= _shift
@@ -154,7 +167,9 @@ def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb):
 
 	## merge 
 	_merge_lst = []
-	for _bin_smps, _bin_aps, _dt_smps, _dt_aps in zip(_smps_bin,_aps_bin,_smps.values,_aps.values):
+	for _bin_smps, _bin_aps, _dt_smps, _dt_aps, _sh in zip(_smps_bin,_aps_bin,_smps.values,_aps.values,_shift):
+
+		## remove 
 
 		## keep complete smps bins and data
 		## remove the aps bin data lower than smps bin
@@ -163,19 +178,24 @@ def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb):
 		_merge_bin = n.hstack((_bin_smps,_bin_aps[_condi]))
 		_merge_dt  = n.hstack((_dt_smps,_dt_aps[_condi]))
 
-		_merge_fit_loc = (_merge_bin<_aps_hb)&(_merge_bin>_smps_lb)
+		# _merge_fit_loc = (_merge_bin<_aps_hb)&(_merge_bin>_smps_lb)
+		_merge_fit_loc = (_merge_bin<1500)&(_merge_bin>_smps_lb)
 
-		try:
-			# _unvpl_fc = unvpline(n.log10(_merge_bin[_cspl_fit_loc]),n.log10(_merge_dt[_cspl_fit_loc]),s=50)
-			_inte_log_fc = interp1d(n.log10(_merge_bin[_merge_fit_loc]),n.log10(_merge_dt[_merge_fit_loc]),
-									kind='linear',fill_value='extrapolate')
-			_inte_fc = interp1d(_merge_bin,_merge_dt,kind='linear',fill_value='extrapolate')
-								
-		except:
-			breakpoint()
+		## coeA and coeB 
+		_unvpl_fc = unvpline(n.log(_merge_bin[_merge_fit_loc]),n.log(_merge_dt[_merge_fit_loc]),s=50)
+		# _unvpl_fc = unvpline(_merge_bin[_merge_fit_loc],_merge_dt[_merge_fit_loc],s=150)
+		# _inte_log_fc = interp1d(n.log10(_merge_bin[_merge_fit_loc]),n.log10(_merge_dt[_merge_fit_loc]),
+								# kind='linear',fill_value='extrapolate')
+		_inte_fc = interp1d(_merge_bin,_merge_dt,kind='linear',fill_value='extrapolate')
+							
 
-		_merge_dt_fit = n.hstack((_inte_fc(_std_bin_inte1),10**_inte_log_fc(n.log10(_std_bin_merge)),_inte_fc(_std_bin_inte2)))
-		# __test_plot(_bin_smps,_dt_smps,_bin_aps,_dt_aps,_std_bin,_merge_dt_fit,_merge_bin,_merge_dt,_sh)
+		__merge = n.exp(_unvpl_fc(n.log(_std_bin_merge)))
+		# __merge = _unvpl_fc(_std_bin_merge)
+
+
+		_merge_dt_fit = n.hstack((_inte_fc(_std_bin_inte1),__merge,_inte_fc(_std_bin_inte2)))
+		# _merge_dt_fit = __merge
+		__test_plot(_bin_smps,_dt_smps,_bin_aps,_dt_aps,_std_bin,_merge_dt_fit,_merge_bin,_merge_dt,_sh)
 
 		_merge_lst.append(_merge_dt_fit)
 	
@@ -210,13 +230,13 @@ def _merge_SMPS_APS(df_smps,df_aps,aps_unit,shift_mode,smps_overlap_lowbound,aps
 		aps.columns = aps.keys()*1e3
 
 	## shift infomation, calculate by powerlaw fitting
-	shift = _overlap_fitting(smps,aps,smps_overlap_lowbound,aps_fit_highbound)
+	shift, coe = _overlap_fitting(smps,aps,smps_overlap_lowbound,aps_fit_highbound)
 
 	## process data by shift infomation, and average data
 	qc_cond, shift = _shift_data_process(shift)
 
 	## merge aps and smps..
-	merge_data, density = _merge_data(smps,aps,shift,shift_mode,smps_overlap_lowbound,aps_fit_highbound)
+	merge_data, density = _merge_data(smps,aps,shift,shift_mode,smps_overlap_lowbound,aps_fit_highbound,coe)
 	density.columns = ['density']
 
 	## add total and mode

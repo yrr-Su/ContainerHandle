@@ -90,7 +90,7 @@ def _basic(_lcres,_res,_mass,_ocec_ratio,_ocec_ratio_month,_hr_lim,_range):
 		try:
 			iter(_ocec_ratio)
 		except TypeError:
-			raise TypeError('"ocec_ratio" Only Accet a Single Value !!')
+			raise TypeError('"ocec_ratio" Only Accept a Single Value !!')
 
 		_prcs_df = DataFrame(index=_df_bsc.index)
 		_prcs_df['OC/EC'] = _ocec_ratio

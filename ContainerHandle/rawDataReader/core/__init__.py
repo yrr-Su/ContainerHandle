@@ -39,7 +39,7 @@ class _reader:
 	## the pickle file will be generated after read raw data first time,
 	## if want to re-read the rawdata, please set 'reset=True'
 
-	def __init__(self,_path,QC=True,csv_raw=True,reset=False):
+	def __init__(self,_path,QC=True,csv_raw=True,reset=False,rate=False):
 		# logger.info(f'\n{self.nam}')
 		# print('='*65)
 		# logger.info(f"Reading file and process data")
@@ -50,11 +50,15 @@ class _reader:
 		self.meta  = meta[self.nam]
 
 		self.reset = reset
+		self.rate  = rate
 		self.qc    = QC
 		self.csv   = csv_raw
 
 		self.pkl_nam = f'_read_{self.nam.lower()}.pkl'
 		self.csv_nam = f'_read_{self.nam.lower()}.csv'
+
+		self.pkl_nam_raw = f'_read_{self.nam.lower()}_raw.pkl'
+		self.csv_nam_raw = f'_read_{self.nam.lower()}_raw.csv'
 		
 		# print(f" from {_sta.strftime('%Y-%m-%d %X')} to {_fin.strftime('%Y-%m-%d %X')}")
 		# print('='*65)
@@ -91,17 +95,72 @@ class _reader:
 
 		return _out
 
+	## acquisition rate and yield rate
+	def _rate_calculate(self,_fout_raw,_fout_qc):
+
+		if self.meta['deter_key'] is not None:
+			
+			_start, _end = _fout_qc.index[[0,-1]]
+
+			_drop_how = 'any'
+			_the_size = len(_fout_raw.resample('1h').mean().index)
+
+			_f = (self.path/f'{self.nam}.log').open('a+')
+			_f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
+			_f.write(f"{'-'*30}\n")
+			_f.write(f"{_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
+			print(f"\n\t\tfrom {_start.strftime('%Y-%m-%d %X')} to {_end.strftime('%Y-%m-%d %X')}\n")
+
+			for _nam, _key in self.meta['deter_key'].items():
+
+				if _key==['all']: 
+					_key, _drop_how = _fout_qc.keys(), 'all'
+
+				_real_size = len(_fout_raw[_key].resample('1h').mean().copy().dropna(how=_drop_how).index)
+				_QC_size   = len(_fout_qc[_key].resample('1h').mean().copy().dropna(how=_drop_how).index)
+				try:
+					_acq_rate  = round((_real_size/_the_size)*100,1)
+					_yid_rate  = round((_QC_size/_real_size)*100,1)
+				except ZeroDivisionError:
+					_acq_rate, _yid_rate = 0, 0
+
+				_f.write(f'{_nam} : \n')
+				_f.write(f"\tacquisition rate : {_acq_rate}%\n")
+				_f.write(f'\tyield rate : {_yid_rate}%\n')
+
+				print(f'\t\t{_nam} : ')
+				print(f'\t\t\tacquisition rate : {_acq_rate}%')
+				print(f'\t\t\tyield rate : {_yid_rate}%')
+
+			_f.write(f"{'-'*30}\n")
+			_f.close()
+
+
 	## read raw data
 	def _run(self,_start,_end):
 
-		## read pickle if pickle file exisits and 'reset=False' or process raw data
+		## read pickle if pickle file exists and 'reset=False' or process raw data
 		if (self.path/self.pkl_nam in list(self.path.glob('*.pkl')))&(~self.reset):
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mPICKLE\033[0m file of {self.nam}")
-			with (self.path/self.pkl_nam).open('rb') as f:
-				_fout = pkl.load(f)
-				_start, _end = _start or _fout.index[0], _end or _fout.index[-1]
 
-			return _fout.reindex(date_range(_start,_end,freq=_fout.index.freq.copy()))
+			with (self.path/self.pkl_nam).open('rb') as f:
+				_fout_qc = pkl.load(f)
+
+			_exist = (self.path/self.pkl_nam_raw).exists()
+			if _exist:
+				with (self.path/self.pkl_nam_raw).open('rb') as f:
+					_fout_raw = pkl.load(f)
+			else:
+				_fout_raw = _fout_qc
+
+			_start, _end = to_datetime(_start) or _fout_qc.index[0], to_datetime(_end) or _fout_qc.index[-1]
+			_idx = date_range(_start,_end,freq=_fout_qc.index.freq.copy())
+
+			_fout_raw, _fout_qc = _fout_raw.reindex(_idx), _fout_qc.reindex(_idx)
+			if (self.rate)&(_exist):
+				self._rate_calculate(_fout_raw,_fout_qc)
+
+			return _fout_qc if self.qc else _fout_raw
 		else: 
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mRAW DATA\033[0m of {self.nam} and process it")
 		##=================================================================================================================
@@ -109,73 +168,56 @@ class _reader:
 		_df_con, _f_list = None, list(self.path.glob(self.meta['pattern']))
 
 		if len(_f_list)==0: 
-			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : \033[31mNo File in {self.path} Could Read, Please Check Out the Current Path\033[0m")
+			print(f"\t\t\033[31mNo File in '{self.path}' Could Read, Please Check Out the Current Path\033[0m")
 			return None
 
 		for file in _f_list:
-			if file==(self.path/self.csv_nam): continue
+			if (file==(self.path/self.csv_nam))|(file==(self.path/f'{self.nam}.log')): continue
 			print(f"\r\t\treading {file.name}",end='')
 
 			_df = self._raw_reader(file)
+
 			## concat the concated list
 			if _df is not None:
-
 				_df_con = concat([_df_con,_df]) if _df_con is not None else _df
 		print()
 
-		## reindex data and QC
-		_fout = self._raw_process(_df_con)
-		_start, _end = to_datetime(_start) or _fout.index[0], to_datetime(_end) or _fout.index[-1]
+		## QC
+		_save_raw = self._raw_process(_df_con)
+		_save_qc  = self._QC(_save_raw)
 
-		_fout = _fout.reindex(date_range(_start,_end,freq=_fout.index.freq.copy()))
-		if self.qc:
-			_fout_qc = self._QC(_fout)
+		_save_raw.index.name = 'time'
+		_save_qc.index.name = 'time'
 
-			if self.meta['deter_key'] is not None:
+		_start, _end = to_datetime(_start) or _save_raw.index[0], to_datetime(_end) or _save_raw.index[-1]
+		_idx = date_range(_start,_end,freq=_save_raw.index.freq.copy())
 
-				_drop_how = 'any'
-				_the_size = len(_fout.resample('1h').mean().index)
+		_fout_raw, _fout_qc = _save_raw.reindex(_idx).copy(), _save_qc.reindex(_idx).copy()
 
-				_f = (self.path/f'{self.nam}.log').open('a+')
-				_f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
-				_f.write(f"{'-'*30}\n")
-				_f.write(f"{_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
-
-				for _nam, _key in self.meta['deter_key'].items():
-
-					if _key==['all']: 
-						_key, _drop_how = _fout_qc.keys(), 'all'
-
-					_real_size = len(_fout[_key].resample('1h').mean().copy().dropna(how=_drop_how).index)
-					_QC_size   = len(_fout_qc[_key].resample('1h').mean().copy().dropna(how=_drop_how).index)
-					_acq_rate  = round((_real_size/_the_size)*100,1)
-					_yid_rate  = round((_QC_size/_real_size)*100,1)
-
-					_f.write(f'{_nam} : \n')
-					_f.write(f"\tacquisition rate : {_acq_rate}%\n")
-					_f.write(f'\tyield rate : {_yid_rate}%\n')
-
-					print(f'\n\t\t{_nam} : ')
-					print(f'\t\t\tacquisition rate : {_acq_rate}%')
-					print(f'\t\t\tyield rate : {_yid_rate}%')
-
-				_f.write(f"{'-'*30}\n")
-				_f.close()
-
-			_fout = _fout_qc
-
-		_fout.index.name = 'time'
+		self._rate_calculate(_fout_raw,_fout_qc)
 
 		##=================================================================================================================
 		## dump pickle file
 		with (self.path/self.pkl_nam).open('wb') as f:
-			pkl.dump(_fout,f,protocol=pkl.HIGHEST_PROTOCOL)
+			pkl.dump(_save_qc,f,protocol=pkl.HIGHEST_PROTOCOL)
 
 		## dump csv file
 		if self.csv:
-			_fout.to_csv(self.path/self.csv_nam)
+			_save_qc.to_csv(self.path/self.csv_nam)
+			
 
-		return _fout
+		## output raw data if qc file
+		if self.meta['deter_key'] is not None:
+
+			with (self.path/self.pkl_nam_raw).open('wb') as f:
+				pkl.dump(_save_raw,f,protocol=pkl.HIGHEST_PROTOCOL)
+
+			if self.csv:
+				_save_raw.to_csv(self.path/self.csv_nam_raw)
+
+			return _fout_qc if self.qc else _fout_raw
+
+		return _fout_qc
 
 	## get data
 	def __call__(self,start=None,end=None,mean_freq=None):

@@ -83,12 +83,12 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 			_cond = _status&(mol_A>2*mol_S)
 			df_mass.loc[_cond,'AS'] = mol_S.loc[_cond]*132
 
-	df_mass = df_mass.dropna()
+	df_mass_cal = df_mass.dropna().copy()
 
 	## volume
 	df_vol = DataFrame()
 	for _vol_nam, _coe in vol_coe.items():
-		df_vol[_vol_nam] = df_mass[_vol_nam]/_coe
+		df_vol[_vol_nam] = df_mass_cal[_vol_nam]/_coe
 
 	if df_water is not None:
 		df_vol['ALWC'] = df_water
@@ -104,15 +104,21 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 		if 'total' in _ky: continue
 		df_RI[_ky] = (_df*RI_coe[_ky])
 	
+	df_RI['RI_wet'] = None
 	if df_water is not None:
 		df_RI['RI_wet'] = (df_RI/df_vol['total_wet'].to_frame().values).sum(axis=1)
 
 	df_RI['RI_dry'] = (df_RI[vol_coe.keys()]/df_vol['total_dry'].to_frame().values).sum(axis=1)
 
+	## mole and equivalent
+	df_eq = concat((mol_A,mol_S,mol_N,mol_A*1,mol_S*2,mol_N*1))
+	df_eq.columns = ['mol_NH4','mol_SO4','mol_NO3','eq_NH4','eq_SO4','eq_NO3',]
+
 	## out
 	out = { 'mass'   : df_mass.reindex(index),
 			'volume' : df_vol.reindex(index),
 			'RI' 	 : df_RI[['RI_dry','RI_wet']].reindex(index),
+			# 'equivalent' : df_eq.reindex(index),
 			}
 
 	return out

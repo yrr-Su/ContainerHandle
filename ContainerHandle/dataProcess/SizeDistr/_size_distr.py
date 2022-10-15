@@ -26,7 +26,7 @@ def _geometric_prop(_dp,_prop):
 	return _prop_t, _gmd.apply(n.exp), _gsd.apply(n.exp)
 
 
-def _basic(df,hybrid,unit):
+def _basic(df,hybrid,unit,bin_rg):
 	
 	import numpy as n
 	from pandas import DataFrame, concat
@@ -34,6 +34,9 @@ def _basic(df,hybrid,unit):
 	## get number conc. data and total, mode
 	dN = df
 	dN.columns = dN.keys().to_numpy(float)
+
+	dN_ky = dN.keys()[(dN.keys()>=bin_rg[0])&(dN.keys()<=bin_rg[-1])]
+	dN = dN[dN_ky].copy()
 
 	out_dic = {}
 	## diameter

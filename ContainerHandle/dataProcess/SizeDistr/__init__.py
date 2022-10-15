@@ -13,10 +13,10 @@ class SizeDistr(_writter):
 
 	## basic
 	@_run_process('SizeDistr - basic','distr_basic')
-	def basic(self,df,hybrid_bin_start_loc=None,unit='nm'):
+	def basic(self,df,hybrid_bin_start_loc=None,unit='nm',bin_range=(0,20000)):
 		from ._size_distr import _basic
 
-		out = _basic(df,hybrid_bin_start_loc,unit)
+		out = _basic(df,hybrid_bin_start_loc,unit,bin_range)
 
 		return self, out
 

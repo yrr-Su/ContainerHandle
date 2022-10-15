@@ -11,27 +11,27 @@ class Optical(_writter):
 	
 	## scatter
 	@_run_process('Optical - SAE','SAE')
-	def SAE(self,df,nam='SAE'):
+	def SAE(self,df_sca):
 		from ._scattering import _SAE
 
-		out = _SAE(df)
+		out = _SAE(df_sca)
 
 		return self, out
 	
 	## absorption
 	@_run_process('Optical - absCoe','absCoe')
-	def absCoe(self,df,abs_band=550):
+	def absCoe(self,df_ae33,abs_band=550):
 		from ._absorption import _absCoe
 
-		out = _absCoe(df,abs_band)
+		out = _absCoe(df_ae33,abs_band)
 
 		return self, out
 
 	@_run_process('Optical - AAE','AAE')
-	def AAE(self,df):
+	def AAE(self,df_abs):
 		from ._absorption import _AAE
 
-		out = _AAE(df)
+		out = _AAE(df_abs)
 
 		return self, out
 

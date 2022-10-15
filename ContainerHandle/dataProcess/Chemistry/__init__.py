@@ -21,7 +21,7 @@ class Chemistry(_writter):
 	## OCEC
 	@_run_process('Chemistry - OC/EC basic','ocec_basic')
 	def OCEC_basic(self,df_lcres,df_res,df_mass=None,ocec_ratio=None,ocec_ratio_month=1,hr_lim=200,
-				   least_square_range=(0.1,2.5,0.1),nam='ocec_basic'):
+				   least_square_range=(0.1,2.5,0.1)):
 		from ._ocec import _basic
 
 		out = _basic(df_lcres,df_res,df_mass,ocec_ratio,ocec_ratio_month,hr_lim,least_square_range)
