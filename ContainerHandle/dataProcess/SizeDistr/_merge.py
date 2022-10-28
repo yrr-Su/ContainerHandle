@@ -149,7 +149,7 @@ def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb,_coe)
 	# _cntr = (_smps_lb+_aps_hb)/2
 	_cntr = _test
 	_bin_lb = _smps_key[-1]
-1
+
 	## make shift bins
 	_smps_bin = n.full(_smps.shape,_smps_key)
 	_aps_bin  = n.full(_aps.shape,_aps_key)
@@ -195,7 +195,7 @@ def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb,_coe)
 
 		_merge_dt_fit = n.hstack((_inte_fc(_std_bin_inte1),__merge,_inte_fc(_std_bin_inte2)))
 		# _merge_dt_fit = __merge
-		__test_plot(_bin_smps,_dt_smps,_bin_aps,_dt_aps,_std_bin,_merge_dt_fit,_merge_bin,_merge_dt,_sh)
+		# __test_plot(_bin_smps,_dt_smps,_bin_aps,_dt_aps,_std_bin,_merge_dt_fit,_merge_bin,_merge_dt,_sh)
 
 		_merge_lst.append(_merge_dt_fit)
 	

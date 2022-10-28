@@ -32,7 +32,7 @@ class reader(_reader):
 	## QC data
 	def _QC(self,_df):
 
-		_df[['Thermal_OC','Optical_OC']] = _df[['Thermal_OC','Optical_OC']].where(_df[['Thermal_OC','Optical_OC']]>0).copy()
-		_df[['Thermal_EC','Optical_EC']] = _df[['Thermal_EC','Optical_EC']].where(_df[['Thermal_EC','Optical_EC']]>.01).copy()
+		_df[['Thermal_OC','Optical_OC']] = _df[['Thermal_OC','Optical_OC']].where(_df[['Thermal_OC','Optical_OC']]>0.3).copy()
+		_df[['Thermal_EC','Optical_EC']] = _df[['Thermal_EC','Optical_EC']].where(_df[['Thermal_EC','Optical_EC']]>.015).copy()
 
 		return _df

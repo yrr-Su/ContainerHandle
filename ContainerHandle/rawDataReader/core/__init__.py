@@ -224,7 +224,7 @@ class _reader:
 
 		fout = self._run(start,end)
 
-		if mean_freq is not None:
+		if (mean_freq is not None)&(fout is not None):
 			fout = fout.resample(mean_freq).mean()
 
 		return fout

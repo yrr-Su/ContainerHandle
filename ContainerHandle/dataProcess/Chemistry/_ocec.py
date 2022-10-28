@@ -30,7 +30,7 @@ def _ocec_ratio_cal(_lcres_splt,_hr_lim,_range):
 
 	## estimated OC/EC
 	## the least R2 method
-	if (_lcres_splt.resample('1m').size().values[0]<=_hr_lim):
+	if (len(_lcres_splt)<=_hr_lim):
 
 		print(f"\t\t{_lcres_splt.index[0].strftime('%Y-%m-%d %X')} to {_lcres_splt.index[-1].strftime('%Y-%m-%d %X')}")
 		print('\t\tPlease Modify the Values of "hour_limit" or Input Sufficient Amount of Data !!')
@@ -99,7 +99,7 @@ def _basic(_lcres,_res,_mass,_ocec_ratio,_ocec_ratio_month,_hr_lim,_range):
 
 	else:
 		_df_lst = []
-		for _, _df in _lcres.resample(f'{_ocec_ratio_month}m'):
+		for _, _df in _lcres.resample(f'{_ocec_ratio_month}MS',closed='left'):
 			_df_lst.append(_ocec_ratio_cal(_df,_hr_lim,_range))
 
 		_prcs_df = concat(_df_lst)
