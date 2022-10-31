@@ -172,7 +172,7 @@ class _reader:
 			return None
 
 		for file in _f_list:
-			if (file==(self.path/self.csv_nam))|(file==(self.path/f'{self.nam}.log')): continue
+			if (file==(self.path/self.csv_nam))|(file==(self.path/self.csv_nam_raw))|(file==(self.path/f'{self.nam}.log')): continue
 			print(f"\r\t\treading {file.name}",end='')
 
 			_df = self._raw_reader(file)
