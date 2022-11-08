@@ -113,7 +113,7 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 	## mole and equivalent
 	df_eq = concat((mol_A,mol_S,mol_N,mol_A*1,mol_S*2,mol_N*1),axis=1)
 	df_eq.columns = ['mol_NH4','mol_SO4','mol_NO3','eq_NH4','eq_SO4','eq_NO3',]
-	breakpoint()
+
 	## out
 	out = { 'mass'   : df_mass.reindex(index),
 			'volume' : df_vol.reindex(index),

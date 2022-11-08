@@ -61,5 +61,5 @@ class reader(_reader):
 
 			return _df_1hr.mask(_df_lowb|_df_highb).copy()
 
-		return _df.resample('1h').apply(_QC_func)
+		return _df.resample('1h',group_keys=False).apply(_QC_func)
 
