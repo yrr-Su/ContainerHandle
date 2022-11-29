@@ -20,6 +20,13 @@ meta = {
 
 				   },
 
+		"EPA_vertical" : {
+				   "pattern"   : "*.csv",
+				   "freq"	   : "1h",
+				   "deter_key" : None,
+
+				   },
+
 		"SMPS_TH" : {
 					 "pattern"   : "*.txt",
 					 "freq"		 : "6T",

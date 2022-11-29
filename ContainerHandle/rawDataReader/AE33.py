@@ -26,17 +26,19 @@ class reader(_reader):
 
 			_df.columns = columns
 			_df = _df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7','Status']]
+			_status = _df['Status'].copy()
 
 			## remove data without Status=0, 128(Not much filter tape), 256(Not much filter tape)
 			_df = _df.where((_df['Status']==0)|(_df['Status']==128)|(_df['Status']==256)).copy()
+			_df['Status'] = _status
 
-			return _df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7']]
+			return _df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7','Status']]
 
 	## QC data
 	def _QC(self,_df):
 		
 		## remove negative value
-		_df = _df.mask((_df<0).copy())
+		_df = _df[['BC1','BC2','BC3','BC4','BC5','BC6','BC7']].mask((_df<0).copy())
 
 		## call by _QC function
 		## QC data in 1 hr

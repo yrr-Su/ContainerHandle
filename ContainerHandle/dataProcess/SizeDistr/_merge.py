@@ -198,7 +198,7 @@ def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb,_coe)
 		# __test_plot(_bin_smps,_dt_smps,_bin_aps,_dt_aps,_std_bin,_merge_dt_fit,_merge_bin,_merge_dt,_sh)
 
 		_merge_lst.append(_merge_dt_fit)
-	
+
 	_df_merge = DataFrame(_merge_lst,columns=_std_bin,index=_merge_idx)
 	_df_merge = _df_merge.mask(_df_merge<0)
 

@@ -14,12 +14,12 @@ class reader(_reader):
 
 	def _raw_reader(self,_file):
 		
-		with (_file).open('r',encoding='utf-8',errors='ignore') as f:
+		with (_file).open('r',encoding='utf-8-sig',errors='ignore') as f:
 
 			_time_idx = f.readlines(1)[0][:-2].lower().split(',').index('time')
 
 			f.seek(0)
 
 			_df = read_csv(f,parse_dates=[_time_idx],index_col=_time_idx,na_values=['-'])
-
-		return _df
+			
+		return _df.loc[_df.index.dropna()]
