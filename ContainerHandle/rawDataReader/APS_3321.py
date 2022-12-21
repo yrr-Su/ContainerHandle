@@ -35,7 +35,7 @@ class reader(_reader):
 	def _QC(self,_df):
 
 		## mask out the data size lower than 7
-		_df['total'] = _df.sum(axis=1)*(n.diff(n.log(_df.keys().to_numpy(float)))).mean()
+		_df['total'] = _df.sum(axis=1,min_count=1)*(n.diff(n.log(_df.keys().to_numpy(float)))).mean()
 		_df_size = _df['total'].dropna().resample('1h').size().resample(_df.index.freq).ffill()
 		_df = _df.mask(_df_size<7)
 

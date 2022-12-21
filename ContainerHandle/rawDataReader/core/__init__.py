@@ -146,11 +146,11 @@ class _reader:
 			_f.close()
 
 	## append new data to exist pkl
-	def _apnd_prcs(self,*_df_lst):
+	def _apnd_prcs(self,_df_done,_df_apnd):
 
-		_df = concat(_df_lst)
+		_df = concat([_df_done.dropna(how='all').copy(),_df_apnd.dropna(how='all').copy()])
 
-		_idx = date_range(*_df.index.sort_values()[[0,-1]],freq=_df_lst[0].index.freq.copy())
+		_idx = date_range(*_df.index.sort_values()[[0,-1]],freq=_df_done.index.freq.copy())
 		_idx.name = 'time'
 		
 		return _df.loc[~_df.index.duplicated()].copy().reindex(_idx)
@@ -252,6 +252,7 @@ class _reader:
 
 		## append new data and pickle data
 		if self.apnd:
+
 			_f_raw = self._apnd_prcs(_f_raw_done,_f_raw)
 			_f_qc  = self._apnd_prcs(_f_qc_done,_f_qc)
 
@@ -283,6 +284,8 @@ class _reader:
 
 
 
+
+# -------------------------------------------------------------------------------------
 	## old flow
 	def __run(self,_start,_end):
 
