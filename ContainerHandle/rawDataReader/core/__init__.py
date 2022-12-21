@@ -148,7 +148,7 @@ class _reader:
 	## append new data to exist pkl
 	def _apnd_prcs(self,_df_done,_df_apnd):
 
-		_df = concat([_df_done.dropna(how='all').copy(),_df_apnd.dropna(how='all').copy()])
+		_df = concat([_df_apnd.dropna(how='all').copy(),_df_done.dropna(how='all').copy()])
 
 		_idx = date_range(*_df.index.sort_values()[[0,-1]],freq=_df_done.index.freq.copy())
 		_idx.name = 'time'
