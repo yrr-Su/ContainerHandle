@@ -84,6 +84,7 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 			df_mass.loc[_cond,'AS'] = mol_S.loc[_cond]*132
 
 	df_mass_cal = df_mass.dropna().copy()
+	df_mass['total'] = df_mass.sum(axis=1,min_count=6)
 
 	## volume
 	df_vol = DataFrame()
@@ -96,6 +97,9 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 		df_vol['total_wet'] = df_vol.sum(axis=1)
 
 	df_vol['total_dry'] = df_vol[vol_coe.keys()].sum(axis=1)
+
+	## density
+	df_den = df_mass['total']/df_vol['total_dry']
 
 	## refractive index
 	df_RI = DataFrame()
@@ -115,10 +119,11 @@ def _basic(df_che,df_ref,df_water,nam_lst):
 	df_eq.columns = ['mol_NH4','mol_SO4','mol_NO3','eq_NH4','eq_SO4','eq_NO3',]
 
 	## out
-	out = { 'mass'   : df_mass.reindex(index),
-			'volume' : df_vol.reindex(index),
-			'RI' 	 : df_RI[['RI_dry','RI_wet']].reindex(index),
-			'eq' 	 : df_eq.reindex(index),
+	out = { 'mass'    : df_mass.reindex(index),
+			'volume'  : df_vol.reindex(index),
+			'RI' 	  : df_RI[['RI_dry','RI_wet']].reindex(index),
+			'eq' 	  : df_eq.reindex(index),
+			'density' : df_den.reindex(index),
 			}
 
 	return out
