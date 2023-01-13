@@ -65,7 +65,9 @@ meta = {
 		"OCEC_LCRES" : {
 					    "pattern"   : "*LCRes.csv",
 					    "freq"	    : "1h",
-					    "deter_key" : { "Thermal OC/EC" : ["Thermal_OC","Thermal_EC",] },
+					    "deter_key" : { "Thermal OC/EC" : ["Thermal_EC","Thermal_OC"],
+										"Thermal OC" : ["Thermal_OC"],
+										"Thermal EC" : ["Thermal_EC"],}
 
 					},
 

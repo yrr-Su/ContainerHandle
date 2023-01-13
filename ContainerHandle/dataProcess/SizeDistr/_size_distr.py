@@ -60,32 +60,45 @@ def _basic(df,hybrid,unit,bin_rg):
 	## size range mode process 
 	df_oth = DataFrame(index=dN.index)
 
-	bound = n.array([(11,25),(25,100),(100,1e3),(1e3,2.5e3),])
+	bound = n.array([(dp.min(),dp.max()+1),(10,25),(25,100),(100,1e3),(1e3,2.5e3),])
 	if unit=='um':
 		bound /= 1e3
 
-	for _nam, _range in zip(['Nucleation','Aitken','Accumulation','Coarse'],bound):
 
-		_dia = dp[(dp>=_range[0])&(dp<_range[-1])]
 
-		if ~_dia.any(): continue
-		
-		_dN = out_dic['number'][_dia].copy()
-		df_oth[f'{_nam}_mode'] = _dN.idxmax(axis=1)
-		df_oth[f'{_nam}_TNC']  = _dN.sum(axis=1,min_count=1)
-	
-	## total, GMD and GSD
-	df_oth['total'], df_oth['GMD'], df_oth['GSD'] = _geometric_prop(dp,out_dic['number'])
-	df_oth['total_surf'], df_oth['GMD_surf'], df_oth['GSD_surf'] = _geometric_prop(dp,out_dic['surface'])
-	df_oth['total_volume'], df_oth['GMD_volume'], df_oth['GSD_volume'] = _geometric_prop(dp,out_dic['volume'])
+	for _tp_nam, _tp_dt in zip(['num','surf','vol'],[out_dic['number'],out_dic['surface'],out_dic['volume']]):
 
-	## mode
-	df_oth['mode']  	   = out_dic['number'].idxmax(axis=1)
-	df_oth['mode_surface'] = out_dic['surface'].idxmax(axis=1)
-	df_oth['mode_volume']  = out_dic['volume'].idxmax(axis=1)
+		for _md_nam, _range in zip(['all','Nucleation','Aitken','Accumulation','Coarse'],bound):
+
+			_dia = dp[(dp>=_range[0])&(dp<_range[-1])]
+			if ~_dia.any(): continue
+
+			_dt = _tp_dt[_dia].copy()
+
+			df_oth[f'total_{_tp_nam}_{_md_nam}'], df_oth[f'GMD_{_tp_nam}_{_md_nam}'], df_oth[f'GSD_{_tp_nam}_{_md_nam}'] = _geometric_prop(_dia,_dt)
+			df_oth[f'mode_{_tp_nam}_{_md_nam}'] = _dt.idxmax(axis=1)
 
 	## out
 	out_dic['other'] = df_oth
 	
 
 	return out_dic
+
+
+
+
+# old 20230113
+
+# _dN = out_dic['number'][_dia].copy()
+# df_oth[f'{_nam}_mode'] = _dN.idxmax(axis=1)
+# df_oth[f'{_nam}_TNC']  = _dN.sum(axis=1,min_count=1)
+
+## total, GMD and GSD
+# df_oth['total'], df_oth['GMD'], df_oth['GSD'] = _geometric_prop(dp,out_dic['number'])
+# df_oth['total_surf'], df_oth['GMD_surf'], df_oth['GSD_surf'] = _geometric_prop(dp,out_dic['surface'])
+# df_oth['total_volume'], df_oth['GMD_volume'], df_oth['GSD_volume'] = _geometric_prop(dp,out_dic['volume'])
+
+## mode
+# df_oth['mode']  	   = out_dic['number'].idxmax(axis=1)
+# df_oth['mode_surface'] = out_dic['surface'].idxmax(axis=1)
+# df_oth['mode_volume']  = out_dic['volume'].idxmax(axis=1)
