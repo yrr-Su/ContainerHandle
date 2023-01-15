@@ -102,10 +102,10 @@ class _reader:
 		_idx = date_range(_start,_end,freq=_df.index.freq.copy())
 		_idx.name = 'time'
 
-		return _df.reindex(_idx)
+		return _df.reindex(_idx), _st, _ed
 
 	## acquisition rate and yield rate
-	def _rate_calculate(self,_fout_raw,_fout_qc):
+	def _rate_calculate(self,_fout_raw,_fout_qc,_st_raw,_ed_raw):
 
 		if self.meta['deter_key'] is not None:
 			
@@ -117,7 +117,9 @@ class _reader:
 			_f = (self.path/f'{self.nam}.log').open('a+')
 			_f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
 			_f.write(f"{'-'*30}\n")
-			_f.write(f"{_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
+			_f.write(f"rawdata time : {_st_raw.strftime('%Y-%m-%d %X')} ~ {_ed_raw.strftime('%Y-%m-%d %X')}\n")
+			_f.write(f"output time : {_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
+			_f.write(f"{'-'*30}\n")
 			print(f"\n\t\tfrom {_start.strftime('%Y-%m-%d %X')} to {_end.strftime('%Y-%m-%d %X')}\n")
 
 			for _nam, _key in self.meta['deter_key'].items():
@@ -237,10 +239,10 @@ class _reader:
 			_f_raw_done, _f_qc_done = self._read_pkl()
 
 			if not self.apnd:
-				_f_raw_done = self._tmidx_process(_start,_end,_f_raw_done)
-				_f_qc_done  = self._tmidx_process(_start,_end,_f_qc_done)
+				_f_raw_done, _start_raw, _end_raw = self._tmidx_process(_start,_end,_f_raw_done)
+				_f_qc_done, _start_raw, _end_raw  = self._tmidx_process(_start,_end,_f_qc_done)
 
-				if self.rate: self._rate_calculate(_f_raw_done,_f_qc_done)
+				if self.rate: self._rate_calculate(_f_raw_done,_f_qc_done,_start_raw,_end_raw)
 
 				return _f_qc_done if self.qc else _f_raw_done
 
@@ -261,10 +263,10 @@ class _reader:
 
 		## process time index 
 		if (_start is not None)|(_end is not None):
-			_f_raw = self._tmidx_process(_start,_end,_f_raw)
-			_f_qc  = self._tmidx_process(_start,_end,_f_qc)
+			_f_raw, _start_raw, _end_raw = self._tmidx_process(_start,_end,_f_raw)
+			_f_qc, _start_raw, _end_raw  = self._tmidx_process(_start,_end,_f_qc)
 
-		self._rate_calculate(_f_raw,_f_qc)
+		self._rate_calculate(_f_raw,_f_qc,_start_raw,_end_raw)
 
 		return _f_qc if self.qc else _f_raw
 
