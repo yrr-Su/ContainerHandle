@@ -78,6 +78,39 @@ meta = {
 
 					},
 
+		"IGAC_TH" : {
+				   "pattern"   : "*.csv",
+				   "freq"	   : "1h",
+				   "deter_key" : { "Na+"   : ["Na+"],
+								   "NH4+"  : ["NH4+"],
+								   "K+"	   : ["K+"],
+								   "Mg2+"  : ["Mg2+"],
+								   "Ca2+"  : ["Ca2+"],
+								   "Cl-"   : ["Cl-"],
+								   "NO2-"  : ["NO2-"],
+								   "NO3-"  : ["NO3-"],
+								   "SO42-" : ["SO42-"],
+								   "Main Salt (NH4+, NO3-, SO42-)" : ["NO3-","SO42-","NH4+"],
+								},
+				   },
+
+		"IGAC_TH" : {
+				   "pattern"   : "*.csv",
+				   "freq"	   : "1h",
+				   "deter_key" : { "Na+"   : ["Na+"],
+								   "NH4+"  : ["NH4+"],
+								   "K+"	   : ["K+"],
+								   "Mg2+"  : ["Mg2+"],
+								   "Ca2+"  : ["Ca2+"],
+								   "Cl-"   : ["Cl-"],
+								   "NO2-"  : ["NO2-"],
+								   "NO3-"  : ["NO3-"],
+								   "SO42-" : ["SO42-"],
+								   "Main Salt (NH4+, NO3-, SO42-)" : ["NO3-","SO42-","NH4+"],
+								},
+
+				   },
+
 
 
 

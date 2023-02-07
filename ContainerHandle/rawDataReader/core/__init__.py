@@ -1,12 +1,11 @@
 
-from datetime import datetime as dtm
-from datetime import timedelta as dtmdt
+from datetime import datetime as dtm, timedelta as dtmdt
 from pandas import date_range, concat, to_numeric, to_datetime
 from pathlib import Path
 from ..utils.config import meta
 import pickle as pkl
-
-# import json as jsn
+import json as jsn
+import numpy as n
 
 __all__ = [
 			'_reader'
@@ -18,11 +17,6 @@ __all__ = [
 """
 
 # """
-# meta data
-# with (Path(__file__).parent/'meta.json').open('r',encoding='utf-8',errors='ignore') as f:
-	# meta = jsn.load(f)
-
-
 
 # rawDataReader parent class
 ## parant class (read file)
@@ -62,6 +56,7 @@ class _reader:
 		self.csv_nam_raw = f'_read_{self.nam.lower()}_raw.csv'
 
 		self.csv_out = f'output_{self.nam.lower()}.csv'
+
 		
 		# print(f" from {_sta.strftime('%Y-%m-%d %X')} to {_fin.strftime('%Y-%m-%d %X')}")
 		# print('='*65)
@@ -150,12 +145,29 @@ class _reader:
 	## append new data to exist pkl
 	def _apnd_prcs(self,_df_done,_df_apnd):
 
-		_df = concat([_df_apnd.dropna(how='all').copy(),_df_done.dropna(how='all').copy()])
+		if _df_apnd is not None:
+			_df = concat([_df_apnd.dropna(how='all').copy(),_df_done.dropna(how='all').copy()])
 
-		_idx = date_range(*_df.index.sort_values()[[0,-1]],freq=_df_done.index.freq.copy())
-		_idx.name = 'time'
+			_idx = date_range(*_df.index.sort_values()[[0,-1]],freq=_df_done.index.freq.copy())
+			_idx.name = 'time'
+			
+			return _df.loc[~_df.index.duplicated()].copy().reindex(_idx)
+
+		return _df_done
+
+	## remove outlier
+	def _outlier_prcs(self,_df):
+
+		if (self.path/'outlier.json') not in self.path.glob('*.json'):
+			return _df
+
+		with (self.path/'outlier.json').open('r',encoding='utf-8',errors='ignore') as f:
+			self.outlier = jsn.load(f)
+
+		for _st, _ed in self.outlier.values():
+			_df.loc[_st:_ed] = n.nan
 		
-		return _df.loc[~_df.index.duplicated()].copy().reindex(_idx)
+		return _df
 
 	## save pickle file
 	def _save_dt(self,_save_raw,_save_qc):
@@ -205,10 +217,6 @@ class _reader:
 	def _read_raw(self,):
 		_df_con, _f_list = None, list(self.path.glob(self.meta['pattern']))
 
-		if len(_f_list)==0: 
-			print(f"\t\t\033[31mNo File in '{self.path}' Could Read, Please Check Out the Current Path\033[0m")
-			return None, None
-
 		for file in _f_list:
 			if file.name in [self.csv_out,self.csv_nam,self.csv_nam_raw,f'{self.nam}.log']: continue
 
@@ -219,6 +227,10 @@ class _reader:
 			## concat the concated list
 			if _df is not None:
 				_df_con = concat([_df_con,_df]) if _df_con is not None else _df
+		
+		if _df_con is None:
+			print(f"\t\t\033[31mNo File in '{self.path}' Could Read, Please Check Out the Current Path\033[0m")
+			return None, None
 		print()
 
 		## QC
@@ -242,6 +254,8 @@ class _reader:
 				_f_raw_done, _start_raw, _end_raw = self._tmidx_process(_start,_end,_f_raw_done)
 				_f_qc_done, _start_raw, _end_raw  = self._tmidx_process(_start,_end,_f_qc_done)
 
+				_f_qc_done = self._outlier_prcs(_f_qc_done)
+
 				if self.rate: self._rate_calculate(_f_raw_done,_f_qc_done,_start_raw,_end_raw)
 
 				return _f_qc_done if self.qc else _f_raw_done
@@ -254,17 +268,18 @@ class _reader:
 
 		## append new data and pickle data
 		if self.apnd:
-
 			_f_raw = self._apnd_prcs(_f_raw_done,_f_raw)
 			_f_qc  = self._apnd_prcs(_f_qc_done,_f_qc)
+
+		_f_qc = self._outlier_prcs(_f_qc)
 
 		## save
 		self._save_dt(_f_raw,_f_qc)
 
 		## process time index 
-		if (_start is not None)|(_end is not None):
-			_f_raw, _start_raw, _end_raw = self._tmidx_process(_start,_end,_f_raw)
-			_f_qc, _start_raw, _end_raw  = self._tmidx_process(_start,_end,_f_qc)
+		# if (_start is not None)|(_end is not None):
+		_f_raw, _start_raw, _end_raw = self._tmidx_process(_start,_end,_f_raw)
+		_f_qc, _start_raw, _end_raw  = self._tmidx_process(_start,_end,_f_qc)
 
 		self._rate_calculate(_f_raw,_f_qc,_start_raw,_end_raw)
 

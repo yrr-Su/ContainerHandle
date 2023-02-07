@@ -11,6 +11,8 @@ __all__ = [
 			'TEOM',
 			'OCEC_RES',
 			'OCEC_LCRES',
+			'IGAC_TH',
+			'IGAC_ZM',
 
 
 
