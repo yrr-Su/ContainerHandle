@@ -94,7 +94,7 @@ meta = {
 								},
 				   },
 
-		"IGAC_TH" : {
+		"IGAC_ZM" : {
 				   "pattern"   : "*.csv",
 				   "freq"	   : "1h",
 				   "deter_key" : { "Na+"   : ["Na+"],

@@ -109,12 +109,17 @@ class _reader:
 			_drop_how = 'any'
 			_the_size = len(_fout_raw.resample('1h').mean().index)
 
-			_f = (self.path/f'{self.nam}.log').open('a+')
+			_f_pth = (self.path/f'{self.nam}.log')
+			_f = _f_pth.open('r+' if _f_pth.exists() else 'w+')
+
+			_cont = _f.read()
+			_f.seek(0)
+
 			_f.write(f"\n{dtm.now().strftime('%Y/%m/%d %X')}\n")
-			_f.write(f"{'-'*30}\n")
-			_f.write(f"rawdata time : {_st_raw.strftime('%Y-%m-%d %X')} ~ {_ed_raw.strftime('%Y-%m-%d %X')}\n")
-			_f.write(f"output time : {_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
-			_f.write(f"{'-'*30}\n")
+			_f.write(f"{'-'*60}\n")
+			_f.write(f"rawdata time : \n\t{_st_raw.strftime('%Y-%m-%d %X')} ~ {_ed_raw.strftime('%Y-%m-%d %X')}\n")
+			_f.write(f"output time : \n\t{_start.strftime('%Y-%m-%d %X')} ~ {_end.strftime('%Y-%m-%d %X')}\n")
+			_f.write(f"{'-'*60}\n")
 			print(f"\n\t\tfrom {_start.strftime('%Y-%m-%d %X')} to {_end.strftime('%Y-%m-%d %X')}\n")
 
 			for _nam, _key in self.meta['deter_key'].items():
@@ -139,7 +144,9 @@ class _reader:
 				print(f'\t\t\tacquisition rate : {_acq_rate}%')
 				print(f'\t\t\tyield rate : {_yid_rate}%')
 
-			_f.write(f"{'-'*30}\n")
+			_f.write(f"{'='*40}\n")
+			_f.write(_cont)
+
 			_f.close()
 
 	## append new data to exist pkl
