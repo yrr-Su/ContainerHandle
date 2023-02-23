@@ -3,7 +3,7 @@
 
 
 from .core import _reader
-from pandas import read_csv, concat
+from pandas import read_csv, concat, to_numeric
 from datetime import datetime as dtm
 from pathlib import Path
 import numpy as n
@@ -13,33 +13,33 @@ class reader(_reader):
 
 	nam = 'IGAC_ZM'
 
-	def _raw_reader(self,_file):
+	def _raw_reader(self, _file):
 			
 		with (_file).open('r',encoding='utf-8-sig',errors='ignore') as f:
 
-			_time_idx = f.readlines(1)[0][:-2].lower().split(',').index('time')
+			_df = read_csv(f,parse_dates=[0],index_col=[0],na_values=['-']).apply(to_numeric,errors='coerce')
 
-			f.seek(0)
-
-			_df = read_csv(f,parse_dates=[_time_idx],index_col=_time_idx,na_values=['-'])
+			_df.columns = _df.keys().str.strip(' ')
+			_df.index.name = 'time'
 			
-		return _df.loc[_df.index.dropna()]
+		return _df.loc[_df.index.dropna()].loc[~_df.index.duplicated()]
 
 	## QC data
-	def _QC(self,_df):
+	def _QC(self, _df):
 
 		## QC parameter, function (MDL SE LE)
 		_mdl = {
-				'Na+'	: 0.0140,
-				'NH4+'	: 0.0258,
-				'K+'	: 0.0199,
-				'Mg2+'	: 0.0174,
-				'Ca2+'	: 0.0785,
-				'Cl-' 	: 0.0525,
-				'NO2-'	: 0.0341,
-				'NO3-'	: 0.0598,
-				'SO42-' : 0.0386,
+				'Na+'	 : 0.06,
+				'NH4+'	 : 0.05,
+				'K+'	 : 0.05,
+				'Mg2+'	 : 0.12,
+				'Ca2+'	 : 0.07,
+				'Cl-' 	 : 0.07,
+				'NO2-'	 : 0.05,
+				'NO3-'	 : 0.11,
+				'SO42-'  : 0.08,
 				}
+		_mdl.update(self._oth_set.get('mdl', {}))
 
 		def _se_le(_df_, _log=False):
 			_df_ = n.log10(_df_) if _log else _df_

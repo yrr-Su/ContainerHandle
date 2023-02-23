@@ -23,9 +23,9 @@ class reader(_reader):
 			f.seek(0)
 
 			_df = read_csv(f,parse_dates=[_time_idx],index_col=_time_idx,na_values=['-'])
+			_df.columns = _df.keys().str.strip(' ')
 			
-		return _df.loc[_df.index.dropna()]
-
+		return _df.loc[_df.index.dropna()].loc[~_df.index.duplicated()]
 
 
 	## QC data

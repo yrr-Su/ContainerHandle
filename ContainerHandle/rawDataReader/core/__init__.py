@@ -33,7 +33,7 @@ class _reader:
 	## the pickle file will be generated after read raw data first time,
 	## if want to re-read the rawdata, please set 'reset=True'
 
-	def __init__(self,_path,QC=True,csv_raw=True,reset=False,rate=False,append_data=False):
+	def __init__(self, _path, QC=True, csv_raw=True, reset=False, rate=False, append_data=False):
 		# logger.info(f'\n{self.nam}')
 		# print('='*65)
 		# logger.info(f"Reading file and process data")
@@ -293,7 +293,9 @@ class _reader:
 		return _f_qc if self.qc else _f_raw
 
 	## get data
-	def __call__(self,start=None,end=None,mean_freq=None,csv_out=False):
+	def __call__(self, start=None, end=None, mean_freq=None, csv_out=False, **kwarg):
+
+		self._oth_set = kwarg
 
 		fout = self._run(start,end)
 
