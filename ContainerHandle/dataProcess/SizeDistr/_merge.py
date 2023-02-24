@@ -8,7 +8,6 @@ from pandas import DataFrame, to_datetime
 from scipy.interpolate import UnivariateSpline as unvpline, interp1d
 import numpy as n
 np = n
-from matplotlib.pyplot import subplots, close, show, rcParams
 
 __all__ = [
 			'_merge_SMPS_APS',
@@ -18,7 +17,8 @@ __all__ = [
 
 
 def __test_plot(smpsx,smps,apsx,aps,mergex,merge,mergeox,mergeo,_sh):
-	
+	from matplotlib.pyplot import subplots, close, show, rcParams
+
 	## parameter
 	# '''
 	## plot

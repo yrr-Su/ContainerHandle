@@ -13,6 +13,8 @@ __all__ = [
 			'OCEC_LCRES',
 			'IGAC_TH',
 			'IGAC_ZM',
+			'VOC_TH',
+			'VOC_ZM',
 
 
 

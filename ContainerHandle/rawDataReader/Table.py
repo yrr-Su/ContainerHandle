@@ -16,9 +16,10 @@ class reader(_reader):
 		
 		with (_file).open('r',encoding='utf-8-sig',errors='ignore') as f:
 
-			_df = read_csv(f,parse_dates=[0],index_col=[0],na_values=['-']).apply(to_numeric,errors='coerce')
+			_df = read_csv(f,parse_dates=[0],index_col=[0],na_values=['-'])
 
 			_df.columns = _df.keys().str.strip(' ')
 			_df.index.name = 'time'
 			
-		return _df.loc[_df.index.dropna()].loc[~_df.index.duplicated()]
+			_df = _df[_keys].loc[_df.index.dropna()]
+		return _df.loc[~_df.index.duplicated()]

@@ -111,6 +111,20 @@ meta = {
 
 				   },
 
+		"VOC_TH" : {
+				   "pattern"   : "*.csv",
+				   "freq"	   : "1h",
+				   "deter_key" : None,
+
+				   },
+
+		"VOC_ZM" : {
+				   "pattern"   : "*.csv",
+				   "freq"	   : "1h",
+				   "deter_key" : None,
+
+				   },
+
 
 
 
