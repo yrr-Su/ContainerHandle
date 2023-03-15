@@ -6,9 +6,9 @@ from datetime import datetime as dtm
 
 class _writter:
 
-	def __init__(self,path_out=None,excel=True,csv=False):
+	def __init__(self, path_out=None, excel=True, csv=False):
 
-		self.path_out = path_out
+		self.path_out = Path(path_out)
 		self.excel	  = excel
 		self.csv	  = csv
 

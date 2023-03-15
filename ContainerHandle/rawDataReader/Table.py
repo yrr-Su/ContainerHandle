@@ -21,5 +21,4 @@ class reader(_reader):
 			_df.columns = _df.keys().str.strip(' ')
 			_df.index.name = 'time'
 			
-			_df = _df[_keys].loc[_df.index.dropna()]
-		return _df.loc[~_df.index.duplicated()]
+		return _df.loc[_df.index.dropna()].loc[~_df.index.duplicated()]
