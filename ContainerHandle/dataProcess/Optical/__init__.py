@@ -37,10 +37,10 @@ class Optical(_writter):
 
 	## extinction
 	@_run_process('Optical - basic','opt_basic')
-	def basic(self,df_abs,df_sca,df_ec=None,df_mass=None,df_no2=None):
+	def basic(self, df_abs, df_sca, df_ec=None, df_mass=None, df_no2=None):
 		from ._extinction import _basic
 
-		out = _basic(df_abs,df_sca,df_ec,df_mass,df_no2)
+		out = _basic(df_abs, df_sca, df_ec, df_mass, df_no2)
 		
 		return self, out
 

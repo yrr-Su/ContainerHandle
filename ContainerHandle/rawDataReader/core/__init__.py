@@ -250,17 +250,19 @@ class _reader:
 	## main flow
 	def _run(self,_start,_end):
 
+		_f_raw_done, _f_qc_done = None, None
+
 		## read pickle if pickle file exists and 'reset=False' or process raw data or append new data
 		_pkl_exist = self.path/self.pkl_nam in list(self.path.glob('*.pkl'))
-		if _pkl_exist&((~self.reset)|(self.apnd)):
+		if _pkl_exist & ( (~self.reset) | (self.apnd) ):
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mPICKLE\033[0m file of {self.nam}")
 
 			_f_raw_done, _f_qc_done = self._read_pkl()
 
 			if not self.apnd:
-				_f_raw_done, _start_raw, _end_raw = self._tmidx_process(_start,_end,_f_raw_done)
-				_f_qc_done, _start_raw, _end_raw  = self._tmidx_process(_start,_end,_f_qc_done)
-
+				_f_raw_done, _start_raw, _end_raw = self._tmidx_process(_start, _end, _f_raw_done)
+				_f_qc_done,  _start_raw, _end_raw = self._tmidx_process(_start, _end, _f_qc_done)
+																			    
 				_f_qc_done = self._outlier_prcs(_f_qc_done)
 
 				if self.rate: self._rate_calculate(_f_raw_done,_f_qc_done,_start_raw,_end_raw)
@@ -274,9 +276,9 @@ class _reader:
 		if _f_raw is None: return None
 
 		## append new data and pickle data
-		if self.apnd:
-			_f_raw = self._apnd_prcs(_f_raw_done,_f_raw)
-			_f_qc  = self._apnd_prcs(_f_qc_done,_f_qc)
+		if ( self.apnd & _pkl_exist ):
+			_f_raw = self._apnd_prcs(_f_raw_done, _f_raw)
+			_f_qc  = self._apnd_prcs(_f_qc_done, _f_qc)
 
 		_f_qc = self._outlier_prcs(_f_qc)
 
