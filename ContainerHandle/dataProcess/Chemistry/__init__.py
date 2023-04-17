@@ -18,6 +18,28 @@ class Chemistry(_writter):
 		
 		return self, out
 
+	## Partition
+	@_run_process('Chemistry -  Partition', 'partition')
+	def Partition(self, *df_chem, nam_lst=['NH4+', 'SO42-', 'NO3-', 'Cl-', 'NO2', 'HNO3', 'SO2', 'NH3', 'HCl', 'temp']):
+		from ._partition import _basic
+
+		out = _basic(df_chem, nam_lst=nam_lst)
+		
+		return self, out
+
+	## ISOROPIA
+	@_run_process('Chemistry - ISOROPIA', 'isoropia')
+	def ISOROPIA(self, *df_chem,
+				 nam_lst=['Na+', 'SO42-', 'NH4+', 'NO3-', 'Cl-', 'Ca2+', 'K+', 'Mg2+', 'NH3', 'HNO3', 'HCl', 'RH', 'temp']):
+		from ._isoropia import _basic
+
+		if self.path_out is None:
+			raise ValueError('Please Input "path_out" !!')
+
+		out = _basic(df_chem, self.path_out, nam_lst=nam_lst)
+		
+		return self, out
+
 	## OCEC
 	@_run_process('Chemistry - OC/EC basic', 'ocec_basic')
 	def OCEC_basic(self, df_lcres, df_res, df_mass=None, ocec_ratio=None, ocec_ratio_month=1, hr_lim=200,

@@ -76,7 +76,7 @@ class _reader:
 
 
 	## set each to true datetime(18:30:01 -> 18:30:00) and rindex data
-	def _raw_process(self,_df):
+	def _raw_process(self, _df):
 
 		## get time from df and set time to whole time to create time index
 		_st, _ed  = _df.index.sort_values()[[0,-1]]
@@ -248,7 +248,7 @@ class _reader:
 
 
 	## main flow
-	def _run(self,_start,_end):
+	def _run(self, _start, _end):
 
 		_f_raw_done, _f_qc_done = None, None
 
@@ -265,7 +265,7 @@ class _reader:
 																			    
 				_f_qc_done = self._outlier_prcs(_f_qc_done)
 
-				if self.rate: self._rate_calculate(_f_raw_done,_f_qc_done,_start_raw,_end_raw)
+				if self.rate: self._rate_calculate(_f_raw_done, _f_qc_done, _start_raw, _end_raw)
 
 				return _f_qc_done if self.qc else _f_raw_done
 
@@ -290,7 +290,7 @@ class _reader:
 		_f_raw, _start_raw, _end_raw = self._tmidx_process(_start,_end,_f_raw)
 		_f_qc, _start_raw, _end_raw  = self._tmidx_process(_start,_end,_f_qc)
 
-		self._rate_calculate(_f_raw,_f_qc,_start_raw,_end_raw)
+		self._rate_calculate(_f_raw, _f_qc, _start_raw, _end_raw)
 
 		return _f_qc if self.qc else _f_raw
 
@@ -298,8 +298,12 @@ class _reader:
 	def __call__(self, start=None, end=None, mean_freq=None, csv_out=False, **kwarg):
 
 		self._oth_set = kwarg
+	
+		if (start is not None) & (end is not None):
+			if end <= start:
+				raise ValueError(f'\nPlease check out input time : \n\tstart : {start.strftime("%Y-%m-%d %X")}\n\tend   : {end.strftime("%Y-%m-%d %X")}')
 
-		fout = self._run(start,end)
+		fout = self._run(start, end)
 
 		if fout is not None:
 			if mean_freq is not None:
