@@ -78,7 +78,7 @@ def _basic(df_che, path_out, nam_lst):
 	df_out['H'] = df_res['HLIQ'] / ( df_res['WATER'] / 1000 )
 
 	df_out.loc[ cond_idx, 'pH' ] = -n.log10( df_out['H'].loc[cond_idx] )
-	df_out['pH'] = df_out['pH'].where( (df_all['RH']<=95)&(df_all['RH']>=20) )
+	df_out['pH'] = df_out['pH'].where( (df_all['RH']<=95) & (df_all['RH']>=20) )
 
 	cond_idx = df_out['pH'].dropna().index
 	df_out.loc[ cond_idx, 'ALWC' ] = df_res['WATER'].loc[cond_idx]
