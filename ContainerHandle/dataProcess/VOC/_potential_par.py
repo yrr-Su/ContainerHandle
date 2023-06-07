@@ -4,7 +4,7 @@
 
 
 from datetime import datetime as dtm
-from pandas import DataFrame, to_datetime
+from pandas import DataFrame, to_datetime, read_json
 from pathlib import Path
 import pickle as pkl
 
@@ -20,6 +20,10 @@ def _basic(_df_voc):
 
 	with (Path(__file__).parent/'voc_par.pkl').open('rb') as f:
 		_par = pkl.load(f)
+		_MW, _MIR, _SOAP, _KOH = _par.loc['MW',_keys], _par.loc['MIR',_keys], _par.loc['SOAP',_keys], _par.loc['KOH',_keys]
+
+	with (Path(__file__).parent/'voc_par.json').open('r', encoding='utf-8', errors='ignore') as f:
+		_parr = read_json(f)
 		_MW, _MIR, _SOAP, _KOH = _par.loc['MW',_keys], _par.loc['MIR',_keys], _par.loc['SOAP',_keys], _par.loc['KOH',_keys]
 
 	_voc_clasfy = {

@@ -22,8 +22,10 @@ def _basic(df_che, path_out, nam_lst):
 	df_input = DataFrame(index=index)
 	df_out   = DataFrame(index=index)
 
-	pth_input  = path_out / '_temp_input.csv'
+	pth_input  = path_out / '_temp_input.txt'
 	pth_output = path_out / '_temp_input.dat'
+
+	pth_input.unlink(missing_ok=True)
 	pth_output.unlink(missing_ok=True)
 
 	## header
@@ -67,7 +69,7 @@ def _basic(df_che, path_out, nam_lst):
 	# use ISOROPIA2
 	run = Popen( [path_iso], stdin=PIPE, stdout=PIPE, stderr=PIPE )
 	scrn_res, run_res = run.communicate( input=str(pth_input.resolve()).encode() )
-
+	breakpoint()
 
 	# read dat file and transform to the normal name
 	cond_idx = df_all[ ['SO42-','NH4+','NO3-'] ].dropna().index

@@ -44,18 +44,19 @@ def _min_Rsq(_oc, _ec, _rng):
 
 
 
-def _ocec_ratio_cal(_lcres_splt, _hr_lim, _range, _wisoc_range):
+def _ocec_ratio_cal(_nam, _lcres_splt, _hr_lim, _range, _wisoc_range):
 
 	## parameter 
 	_out = DataFrame(index=_lcres_splt.index)
-	_oc, _ec = _lcres_splt['Thermal_OC'], _lcres_splt['Thermal_EC']
+	(_, _oc), (_, _ec) = _lcres_splt.items()
+	# _oc, _ec = _lcres_splt['Thermal_OC'], _lcres_splt['Thermal_EC']
 
 	## real data OC/EC
 	_ocec_ratio_real = (_oc / _ec).quantile(.5)
 
-	_out['OC/EC_real'] = _ocec_ratio_real
-	_out['POC_real'] = _ocec_ratio_real * _ec
-	_out['SOC_real'] = _oc - _out['POC_real']
+	_out[f'OC/EC_real_{_nam}'] = _ocec_ratio_real
+	_out[f'POC_real_{_nam}'] = _ocec_ratio_real * _ec
+	_out[f'SOC_real_{_nam}'] = _oc - _out[f'POC_real_{_nam}']
 
 	## the least R2 method
 	## estimated OC/EC
@@ -85,14 +86,15 @@ def _ocec_ratio_cal(_lcres_splt, _hr_lim, _range, _wisoc_range):
 	_wisoc_ratio, _wsoc = _min_Rsq(_oc, _ec, _wisoc_rng)
 
 	## out
-	_out['OC/EC'] = _ocec_ratio
-	_out['SOC']   = _soc
-	_out['POC']	  = _oc - _out['SOC']
-	_out['WISOC/OC']  = _wisoc_ratio
-	_out['WSOC']  = _wsoc
-	_out['WISOC'] = _oc - _out['WSOC']
+	_out[f'OC/EC_{_nam}'] = _ocec_ratio
+	_out[f'SOC_{_nam}']   = _soc
+	_out[f'POC_{_nam}']	  = _oc - _out[f'SOC_{_nam}']
+	_out[f'WISOC/OC_{_nam}']  = _wisoc_ratio
+	_out[f'WSOC_{_nam}']  = _wsoc
+	_out[f'WISOC_{_nam}'] = _oc - _out[f'WSOC_{_nam}']
 
-	return _out[['OC/EC', 'POC', 'SOC', 'WISOC/OC', 'WSOC', 'WISOC', 'OC/EC_real', 'POC_real', 'SOC_real']]
+	return _out[[f'OC/EC_{_nam}', f'POC_{_nam}', f'SOC_{_nam}', f'WISOC/OC_{_nam}', f'WSOC_{_nam}', f'WISOC_{_nam}', 
+				 f'OC/EC_real_{_nam}', f'POC_real_{_nam}', f'SOC_real_{_nam}']]
 
 
 def _basic(_lcres, _res, _mass, _ocec_ratio, _ocec_ratio_month, _hr_lim, _range, _wisoc_range):
@@ -117,7 +119,10 @@ def _basic(_lcres, _res, _mass, _ocec_ratio, _ocec_ratio_month, _hr_lim, _range,
 	else:
 		_df_lst = []
 		for _, _df in _lcres.resample(f'{_ocec_ratio_month}MS', closed='left'):
-			_df_lst.append(_ocec_ratio_cal(_df, _hr_lim, _range, _wisoc_range))
+
+			_thm_cal = _ocec_ratio_cal('thm', _df[['Thermal_OC', 'Thermal_EC']], _hr_lim, _range, _wisoc_range)
+			_opt_cal = _ocec_ratio_cal('opt', _df[['Optical_OC', 'Optical_EC']], _hr_lim, _range, _wisoc_range)
+			_df_lst.append(concat([_thm_cal, _opt_cal], axis=1))
 
 		_prcs_df = concat(_df_lst)
 
@@ -129,6 +134,7 @@ def _basic(_lcres, _res, _mass, _ocec_ratio, _ocec_ratio_month, _hr_lim, _range,
 	for _ky, _val in _df_bsc.items():
 		if 'OC/EC' in _ky: continue
 		_df_ratio[f'{_ky}/Thermal_OC'] = _val / _lcres['Thermal_OC']
+		_df_ratio[f'{_ky}/Optical_OC'] = _val / _lcres['Optical_OC']
 
 	if _mass is not None:
 		for _ky, _val in _df_bsc.items():
@@ -136,6 +142,9 @@ def _basic(_lcres, _res, _mass, _ocec_ratio, _ocec_ratio_month, _hr_lim, _range,
 
 		_df_ratio[f'Thermal_OC/PM'] = _lcres['Thermal_OC'] / _mass
 		_df_ratio[f'Thermal_EC/PM'] = _lcres['Thermal_EC'] / _mass
+
+		_df_ratio[f'Optical_OC/PM'] = _lcres['Optical_OC'] / _mass
+		_df_ratio[f'Optical_EC/PM'] = _lcres['Optical_EC'] / _mass
 
 	## ratio status
 	_df_bsc = concat((_lcres, _df_bsc.copy()),axis=1)
