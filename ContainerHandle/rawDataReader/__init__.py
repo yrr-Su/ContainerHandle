@@ -15,6 +15,7 @@ __all__ = [
 			'IGAC_ZM',
 			'VOC_TH',
 			'VOC_ZM',
+			'SMPS_genr',
 
 
 

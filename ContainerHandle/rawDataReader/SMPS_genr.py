@@ -1,7 +1,7 @@
 
 
 from .core import _reader
-from pandas import to_datetime, read_table
+from pandas import to_datetime, read_table, to_numeric
 from datetime import datetime as dtm
 from pathlib import Path
 
@@ -9,22 +9,33 @@ from pathlib import Path
 
 class reader(_reader):
 
-	nam = 'SMPS_TH'
+	nam = 'SMPS_genr'
 
 	def _raw_reader(self,_file):
 		with open(_file, 'r', encoding='utf-8', errors='ignore') as f:
-			_df  = read_table(f, skiprows=18, parse_dates={'Time':['Date','Start Time']}).set_index('Time')
-			_key = list(_df.keys()[6:-26])
 
-			_newkey = {}
-			for _k in _key: 
-				_newkey[_k] = float(_k).__round__(4)
+			skiprows = 0
+			for _line in f:
+				
+				if _line.split('\t')[0] == 'Sample #':
+					f.seek(0)
+					break
 
-			# _newkey['Total Conc.(#/cm)'] = 'total'
-			# _newkey['Mode(nm)']	= 'mode'
+				skiprows += 1
 
-			_df_idx = to_datetime(_df.index, errors='coerce')
-		return _df[_newkey.keys()].rename(_newkey, axis=1).set_index(_df_idx).loc[_df_idx.dropna()]
+			_df = read_table(f, skiprows=skiprows)
+			_tm_idx = to_datetime(_df['Date'] + _df['Start Time'], format='%m/%d/%y%X', errors='coerce')
+
+			## index
+			_df = _df.set_index(_tm_idx).loc[_tm_idx.dropna()]
+
+			## keys
+			_key = to_numeric(_df.keys(), errors='coerce')
+			_df.columns = _key
+			_df = _df.loc[:, ~_key.isna()]
+
+		return _df.apply(to_numeric, errors='coerce')
+
 
 	## QC data
 	def _QC(self,_df):

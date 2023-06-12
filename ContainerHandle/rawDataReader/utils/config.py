@@ -34,6 +34,13 @@ meta = {
 
 					 },
 
+		"SMPS_genr" : {
+					 "pattern"   : "*.txt",
+					 "freq"		 : "6T",
+					 "deter_key" : { "Bins" : ["all"] },
+
+					 },
+
 		"APS_3321" : {
 					  "pattern"   : "*.TXT",
 					  "freq"	  : "6T",
