@@ -20,15 +20,16 @@ def _min_Rsq(_oc, _ec, _rng):
 	_val_mesh, _oc_mesh = n.meshgrid(_rng, _oc)
 	_val_mesh, _ec_mesh = n.meshgrid(_rng, _ec)
 
-	_out_table = DataFrame(_oc_mesh-_val_mesh*_ec_mesh, index=_oc.index, columns=_rng)
+	_out_table = DataFrame(_oc_mesh - _val_mesh * _ec_mesh, index=_oc.index, columns=_rng)
+
 	## calculate R2
 	_r2_dic = {}
 	_func = lambda _x, _sl, _inte : _sl*_x+_inte
 	for _ocec, _out in _out_table.items():
 
 		_df = DataFrame([_out.values, _ec.values]).T.dropna()
+			
 		_x, _y = _df[0], _df[1]
-
 		_opt, _ = curve_fit(_func, _x, _y)
 
 		_tss = n.sum((_y - _y.mean())**2.)
@@ -64,7 +65,13 @@ def _ocec_ratio_cal(_nam, _lcres_splt, _hr_lim, _range, _wisoc_range):
 
 		print(f"\t\t{_lcres_splt.index[0].strftime('%Y-%m-%d %X')} to {_lcres_splt.index[-1].strftime('%Y-%m-%d %X')}")
 		print('\t\tPlease Modify the Values of "hour_limit" or Input Sufficient Amount of Data !!')
-		_out[['OC/EC', 'POC', 'SOC']] = n.nan
+
+		_out[[f'OC/EC_{_nam}', f'POC_{_nam}', f'SOC_{_nam}', f'WISOC/OC_{_nam}', f'WSOC_{_nam}', f'WISOC_{_nam}']] = n.nan
+				 
+		return _out
+
+	if (len(_lcres_splt.dropna()) == 0):
+		_out[[f'OC/EC_{_nam}', f'POC_{_nam}', f'SOC_{_nam}', f'WISOC/OC_{_nam}', f'WSOC_{_nam}', f'WISOC_{_nam}']] = n.nan
 
 		return _out
 
