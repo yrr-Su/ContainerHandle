@@ -4,10 +4,7 @@ from PyMieScatt import Mie_SD
 from pandas import date_range, concat, DataFrame, to_numeric
 
 
-
-
-
-def _mie(_psd_ori,_RI_ori,_wave):
+def _mie(_psd_ori, _RI_ori, _wave):
 
 
 	_ori_idx = _psd_ori.index.copy()

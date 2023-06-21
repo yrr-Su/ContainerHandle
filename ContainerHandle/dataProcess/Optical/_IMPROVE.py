@@ -7,9 +7,13 @@ from pathlib import Path
 import numpy as n
 np = n
 from pandas import date_range, concat, DataFrame, to_numeric
+from ContainerHandle.dataProcess.core import _union_index
 
 
-def _revised(_df_mass,_df_RH):
+def _revised(_df_mass, _df_RH):
+
+	_df_mass, _df_RH = _union_index(_df_mass, _df_RH)
+
 
 	## fRH
 	with (Path(__file__).parent/'fRH.pkl').open('rb') as f:

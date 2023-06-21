@@ -69,7 +69,6 @@ def _basic(df_che, path_out, nam_lst):
 	# use ISOROPIA2
 	run = Popen( [path_iso], stdin=PIPE, stdout=PIPE, stderr=PIPE )
 	scrn_res, run_res = run.communicate( input=str(pth_input.resolve()).encode() )
-	breakpoint()
 
 	# read dat file and transform to the normal name
 	cond_idx = df_all[ ['SO42-','NH4+','NO3-'] ].dropna().index

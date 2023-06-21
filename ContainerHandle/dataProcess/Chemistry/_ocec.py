@@ -1,5 +1,6 @@
 
 
+from ContainerHandle.dataProcess.core import _union_index
 
 from pandas import date_range, concat, DataFrame, to_numeric
 from scipy.optimize import curve_fit
@@ -45,7 +46,7 @@ def _min_Rsq(_oc, _ec, _rng):
 
 
 
-def _ocec_ratio_cal(_nam, _lcres_splt, _hr_lim, _range, _wisoc_range):
+def _ocec_ratio_cal(_nam, _lcres_splt, _hr_lim, _range_, _wisoc_range_):
 
 	## parameter 
 	_out = DataFrame(index=_lcres_splt.index)
@@ -77,7 +78,7 @@ def _ocec_ratio_cal(_nam, _lcres_splt, _hr_lim, _range, _wisoc_range):
 
 	## OC/EC
 	_ocec_ratio = False
-	_st, _ed, _stp = _range
+	_st, _ed, _stp = _range_
 
 	for _ in range(2):
 		if _ocec_ratio:
@@ -88,8 +89,8 @@ def _ocec_ratio_cal(_nam, _lcres_splt, _hr_lim, _range, _wisoc_range):
 		_ocec_ratio, _soc = _min_Rsq(_oc, _ec, _ocec_rng)
 
 	## WISOC
-	_st, _ed, _stp = _wisoc_range
-	_wisoc_rng = ( n.arange(_st, _ed+_stp, _stp) * _ocec_ratio ).round(3)
+	_st, _ed, _stp = _wisoc_range_
+	_wisoc_rng = ( n.arange(_st, _ed+_stp, _stp) * _ocec_ratio ).round(5)
 	_wisoc_ratio, _wsoc = _min_Rsq(_oc, _ec, _wisoc_rng)
 
 	## out
@@ -105,6 +106,8 @@ def _ocec_ratio_cal(_nam, _lcres_splt, _hr_lim, _range, _wisoc_range):
 
 
 def _basic(_lcres, _res, _mass, _ocec_ratio, _ocec_ratio_month, _hr_lim, _range, _wisoc_range):
+
+	_lcres, _res, _mass = _union_index(_lcres, _res, _mass)
 
 	_out = {}
 

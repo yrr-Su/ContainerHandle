@@ -1,6 +1,7 @@
 
 
 
+from ContainerHandle.dataProcess.core import _union_index
 
 from datetime import datetime as dtm
 from pandas import DataFrame, to_datetime
@@ -214,6 +215,8 @@ def _merge_data(_smps_ori,_aps_ori,_shift_ori,_shift_mode,_smps_lb,_aps_hb,_coe)
 
 ## aps_fit_highbound : the diameter I choose randomly
 def _merge_SMPS_APS(df_smps,df_aps,aps_unit,shift_mode,smps_overlap_lowbound,aps_fit_highbound):
+
+	df_smps, df_aps = _union_index(df_smps, df_aps)
 
 	# print(f'\nMerge data :')
 	# print(f' APS fittint higher diameter : {aps_fit_highbound:4d} nm')

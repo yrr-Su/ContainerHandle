@@ -1,5 +1,5 @@
 
-
+from pandas import DatetimeIndex
 from pathlib import Path
 import pickle as pkl
 from datetime import datetime as dtm
@@ -77,5 +77,14 @@ def _run_process(*_ini_set):
 			return _out
 		return _wrap
 	return _decorator
+
+def _union_index(*_df_arg):
+
+	_idx = DatetimeIndex([])
+
+	for _df in _df_arg:
+		_idx = _idx.union(_df.index)
+
+	return [ _df.reindex(_idx) for _df in _df_arg ]
 
 

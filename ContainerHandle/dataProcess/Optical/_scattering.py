@@ -1,4 +1,6 @@
 
+import numpy as n
+from scipy.optimize import curve_fit
 
 __all__ = [
 			'_SAE',
@@ -12,8 +14,7 @@ __all__ = [
 
 
 def _SAE(df):
-	import numpy as n
-	from scipy.optimize import curve_fit
+	
 
 	def _SAEcalc(_df):
 

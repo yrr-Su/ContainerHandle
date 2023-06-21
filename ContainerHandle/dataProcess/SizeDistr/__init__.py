@@ -34,7 +34,7 @@ class SizeDistr(_writter):
 	@_run_process('SizeDistr - merge_SMPS_APS','distr_merge')
 	def merge_SMPS_APS(self,df_smps,df_aps,aps_unit='um',shift_mode='mobility',
 					   smps_overlap_lowbound=523,aps_fit_highbound=800):
-		from .__merge import _merge_SMPS_APS
+		from ._merge_v1 import _merge_SMPS_APS
 		
 		out = _merge_SMPS_APS(df_smps,df_aps,aps_unit,shift_mode,smps_overlap_lowbound,aps_fit_highbound)
 

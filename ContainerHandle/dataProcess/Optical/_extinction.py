@@ -1,8 +1,12 @@
 
 
+from ContainerHandle.dataProcess.core import _union_index
+from pandas import DataFrame
+
+
 def _basic(df_abs, df_sca, df_ec, df_mass, df_no2):
-	from pandas import DataFrame
-	import numpy as n
+	
+	df_abs, df_sca, df_ec, df_mass, df_no2 = _union_index(df_abs, df_sca, df_ec, df_mass, df_no2)
 
 	df_out = DataFrame()
 

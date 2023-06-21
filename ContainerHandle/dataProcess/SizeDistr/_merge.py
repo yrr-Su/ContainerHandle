@@ -1,6 +1,7 @@
 
 
 
+from ContainerHandle.dataProcess.core import _union_index
 
 from datetime import datetime as dtm
 from pandas import DataFrame, to_datetime
@@ -203,6 +204,8 @@ def _merge_data(_smps_ori, _aps_ori, _shift_ori, _smps_lb, _aps_hb, _coe, _shift
 
 
 def merge_SMPS_APS(df_smps, df_aps, aps_unit='um', smps_overlap_lowbound=500, aps_fit_highbound=1000):
+
+	df_smps, df_aps = _union_index(df_smps, df_aps)
 
 	## set to the same units
 	smps, aps_ori = df_smps.copy(), df_aps.copy()
