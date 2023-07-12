@@ -60,11 +60,9 @@ def _basic(df,hybrid,unit,bin_rg):
 	## size range mode process 
 	df_oth = DataFrame(index=dN.index)
 
-	bound = n.array([(dp.min(),dp.max()+1),(10,25),(25,100),(100,1e3),(1e3,2.5e3),])
+	bound = n.array([(dp.min(),dp.max()+1), (10,25), (25,100), (100,1e3), (1e3,2.5e3),])
 	if unit=='um':
-		bound /= 1e3
-
-
+		bound[1:] /= 1e3
 
 	for _tp_nam, _tp_dt in zip(['num','surf','vol'],[out_dic['number'],out_dic['surface'],out_dic['volume']]):
 

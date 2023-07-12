@@ -18,7 +18,7 @@ def _basic(df_che, nam_lst):
 	# calculate
 	df_out = DataFrame(index=df_umol.index)
 
-	df_out['NTR'] = df_umol['NO3-'] / (df_umol['NH4+'] + df_umol['NH3'])
+	df_out['NTR'] = df_all['NO3-'] / (df_all['NH4+'] + df_all['NH3'])
 
 	df_out['NOR'] = df_umol['NO3-'] / (df_umol['NO3-'] + df_umol['NO2'])
 	df_out['NOR_2'] = (df_umol['NO3-'] + df_umol['HNO3']) / (df_umol['NO3-'] + df_umol['NO2'] + df_umol['HNO3'])
