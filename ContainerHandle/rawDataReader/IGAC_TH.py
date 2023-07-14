@@ -14,18 +14,21 @@ class reader(_reader):
 
 	nam = 'IGAC_TH'
 
-	def _raw_reader(self,_file):
+	def _raw_reader(self, _file):
+
+		self.meta['freq'] = self._oth_set.get('data_freq') or self.meta['freq']
 		
-		with (_file).open('r',encoding='utf-8-sig',errors='ignore') as f:
+		with (_file).open('r', encoding='utf-8-sig', errors='ignore') as f:
+			_df = read_csv(f, low_memory=False, index_col=0)
 
-			_time_idx = f.readlines(1)[0][:-2].lower().split(',').index('time')
+			_df.index = to_datetime( _df.index, errors='coerce', format=self._oth_set.get('date_format') or 'mixed' )
+			_df.index.name = 'time'
 
-			f.seek(0)
-
-			_df = read_csv(f,parse_dates=[_time_idx],index_col=_time_idx,na_values=['-'])
 			_df.columns = _df.keys().str.strip(' ')
-			
-		return _df.loc[_df.index.dropna()].loc[~_df.index.duplicated()]
+
+			_df = _df.loc[_df.index.dropna()].copy()
+
+		return _df.loc[~_df.index.duplicated()]
 
 
 	## QC data
