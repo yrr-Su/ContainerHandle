@@ -2,6 +2,7 @@
 
 __all__ = [
 			'NEPH',
+			'Aurora',
 			'Table',
 			'EPA_vertical',
 			'APS_3321',

@@ -6,6 +6,13 @@ meta = {
 						  "SMPS_TH(SMPS_3080_3772)","APS_3321","TEOM","OCEC"],
 
 
+		"Aurora" : {
+				  "pattern"   : "*.csv",
+				  "freq"	  : "1T",
+				  "deter_key" : { "Scatter Coe. (550 nm)" : ["G"] },
+
+				  },
+
 		"NEPH" : {
 				  "pattern"   : "*.DAT",
 				  "freq"	  : "5T",
