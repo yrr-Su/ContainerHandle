@@ -11,10 +11,10 @@ class Chemistry(_writter):
 	
 	## Reconstruction
 	@_run_process('Chemistry - reconstruction basic', 'reconstrc_basic')
-	def ReConstrc_basic(self, *df_chem, df_ref=None, df_water=None, nam_lst=['NH4+', 'SO42-', 'NO3-', 'Fe', 'Na+', 'OC', 'EC']):
+	def ReConstrc_basic(self, *df_chem, df_ref=None, df_water=None, df_density=None, nam_lst=['NH4+', 'SO42-', 'NO3-', 'Fe', 'Na+', 'OC', 'EC']):
 		from ._mass_volume import _basic
 
-		out = _basic(df_chem, df_ref, df_water, nam_lst=nam_lst)
+		out = _basic(df_chem, df_ref, df_water, df_density, nam_lst=nam_lst)
 		
 		return self, out
 

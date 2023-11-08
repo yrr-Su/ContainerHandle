@@ -3,7 +3,7 @@
 
 
 from .core import _reader
-from pandas import read_csv, concat
+from pandas import read_csv, concat, to_datetime
 from datetime import datetime as dtm
 from pathlib import Path
 import numpy as n

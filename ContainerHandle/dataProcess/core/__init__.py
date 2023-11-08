@@ -1,5 +1,5 @@
 
-from pandas import DatetimeIndex
+from pandas import DatetimeIndex, DataFrame, concat
 from pathlib import Path
 import pickle as pkl
 from datetime import datetime as dtm
@@ -80,11 +80,13 @@ def _run_process(*_ini_set):
 
 def _union_index(*_df_arg):
 
-	_idx = DatetimeIndex([])
+	_idx = concat(_df_arg, axis=1).index
 
-	for _df in _df_arg:
-		_idx = _idx.union(_df.index)
+	# _idx = DatetimeIndex([])
 
-	return [ _df.reindex(_idx) for _df in _df_arg ]
+	# for _df in _df_arg:
+		# _idx = _idx.union(DataFrame(_df).index)
+
+	return [ _df.reindex(_idx) if _df is not None else None for _df in _df_arg ]
 
 

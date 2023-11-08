@@ -116,7 +116,7 @@ def _shift_data_process(_shift):
 	print(f"\t\t{dtm.now().strftime('%m/%d %X')} : \033[92mshift-data quality control\033[0m")
 
 	_rho = _shift**2
-	_shift = _shift.mask((~n.isfinite(_shift))|(_rho>2)|(_rho<0.3))
+	_shift = _shift.mask((~n.isfinite(_shift))|(_rho>2.6)|(_rho<0.3))
 
 	_qc_index = _shift.mask((_rho<0.6)|(_shift.isna())).dropna().index
 

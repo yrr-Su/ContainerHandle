@@ -20,10 +20,10 @@ class Optical(_writter):
 	
 	## absorption
 	@_run_process('Optical - absCoe','absCoe')
-	def absCoe(self,df_ae33,abs_band=550):
+	def absCoe(self, df_ae33, abs_band=[550]):
 		from ._absorption import _absCoe
 
-		out = _absCoe(df_ae33,abs_band)
+		out = _absCoe(df_ae33, abs_band)
 
 		return self, out
 

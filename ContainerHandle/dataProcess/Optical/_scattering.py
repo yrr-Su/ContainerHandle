@@ -19,7 +19,7 @@ def _SAE(df):
 	def _SAEcalc(_df):
 
 		## parameter
-		band = n.array([450,550,700])*1e-3
+		band = n.array([450, 550, 700])*1e-3
 
 		## 3 pts fitting
 		## function

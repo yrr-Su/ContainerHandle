@@ -54,8 +54,8 @@ def _overlap_fitting(_smps_ori, _aps_ori, _smps_lb, _aps_hb):
 	_dt_indx = _smps_ori.index
 
 	## overlap diameter data
-	_aps  = _aps_ori[ _aps_ori.keys()[_aps_ori.keys()<_aps_hb] ].copy()
-	_smps = _smps_ori[ _smps_ori.keys()[_smps_ori.keys()>_smps_lb] ].copy()
+	_aps  = _aps_ori[ _aps_ori.keys()[_aps_ori.keys() < _aps_hb] ].copy()
+	_smps = _smps_ori[ _smps_ori.keys()[_smps_ori.keys() > _smps_lb] ].copy()
 
 	## use SMPS data apply power law fitting
 	## y = Ax^B, A = e**coefa, B = coefb, x = logx, y = logy
@@ -116,11 +116,12 @@ def _shift_data_process(_shift):
 	print(f"\t\t{dtm.now().strftime('%m/%d %X')} : \033[92mshift-data quality control\033[0m")
 
 	_rho = _shift**2
-	_shift = _shift.mask((~n.isfinite(_shift)) | (_rho>2) | (_rho<0.3))
+	_shift = _shift.mask((~n.isfinite(_shift)) | (_rho > 2.6) | (_rho < 0.6))
 
-	_qc_index = _shift.mask((_rho<0.6) | (_shift.isna())).dropna().index
+	# _qc_index = _shift.mask((_rho<0.6) | (_shift.isna())).dropna().index
 
-	return _qc_index, _shift
+	# return _qc_index, _shift
+	return _shift
 	# return _smps.loc[~_big_shift], _aps.loc[~_big_shift], _shift[~_big_shift].reshape(-1,1)
 
 
@@ -224,7 +225,7 @@ def merge_SMPS_APS(df_smps, df_aps, aps_unit='um', smps_overlap_lowbound=500, ap
 		shift, coe = _overlap_fitting(smps, aps_input, smps_overlap_lowbound, aps_fit_highbound)
 
 		## process data by shift infomation, and average data
-		qc_cond, shift = _shift_data_process(shift)
+		shift = _shift_data_process(shift)
 
 		## merge aps and smps
 		merge_arg = (smps, aps_ori, shift, smps_overlap_lowbound, aps_fit_highbound, coe)
@@ -242,11 +243,8 @@ def merge_SMPS_APS(df_smps, df_aps, aps_unit='um', smps_overlap_lowbound=500, ap
 	## out
 	out_dic = {
 				'data_all'     : merge_data_mob,
-				'data_qc'      : merge_data_mob.loc[qc_cond],
 				'data_all_aer' : merge_data_aer,
-				'data_qc_aer'  : merge_data_aer.loc[qc_cond],
 				'density_all'  : density,
-				'density_qc'   : density.loc[qc_cond],
 				}
 
 	## process data
