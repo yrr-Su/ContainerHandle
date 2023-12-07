@@ -33,7 +33,7 @@ class _reader:
 	## the pickle file will be generated after read raw data first time,
 	## if want to re-read the rawdata, please set 'reset=True'
 
-	def __init__(self, _path, QC=True, csv_raw=True, reset=False, rate=False, append_data=False):
+	def __init__(self, _path, QC=True, csv_raw=True, reset=False, rate=False, append_data=False, update_meta=None):
 		# logger.info(f'\n{self.nam}')
 		# print('='*65)
 		# logger.info(f"Reading file and process data")
@@ -42,6 +42,8 @@ class _reader:
 		self.index = lambda _freq: date_range(_sta,_fin,freq=_freq)
 		self.path  = Path(_path)
 		self.meta  = meta[self.nam]
+		if update_meta is not None:
+			self.meta.update(update_meta)
 
 		self.reset = reset
 		self.rate  = rate
@@ -84,7 +86,6 @@ class _reader:
 							  (_ed+dtmdt(hours=1)).strftime('%Y%m%d %H00'),
 							  freq=self.meta['freq'])
 		_tm_index.name = 'time'
-
 		_out = _df.apply(to_numeric,errors='coerce').resample(self.meta['freq']).mean().reindex(_tm_index)
 
 		return _out

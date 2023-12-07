@@ -37,13 +37,24 @@ def _basic(df_che, df_ref, df_water, df_density, nam_lst):
 				'EC'   : 1.5,
 				}
 
-	RI_coe	 = {'ALWC' : 1.333 + 0j,
-			    'AS'   : 1.53 + 0j,
-			    'AN'   : 1.55 + 0j,
-			    'OM'   : 1.55 + 0.0163j,
-			    'Soil' : 1.56 + 0.006j,
-			    'SS'   : 1.54 + 0j,
-			    'EC'   : 1.80 + 0.72j,
+	RI_coe	 = {'550' : {'ALWC' : 1.333 + 0j,
+						 'AS'   : 1.53 + 0j,
+						 'AN'   : 1.55 + 0j,
+						 'OM'   : 1.55 + 0.0163j,
+						 'Soil' : 1.56 + 0.006j,
+						 'SS'   : 1.54 + 0j,
+						 'EC'   : 1.80 + 0.72j,
+						 },
+
+				## m + kj -> m value is same as 550 current
+			    '450' : {'ALWC' : 1.333 + 0j,
+						 'AS'   : 1.57 + 0j,
+						 'AN'   : 1.57 + 0j,
+						 'OM'   : 1.58 + 0.056,
+						 'Soil' : 1.56 + 0.009j,
+						 'SS'   : 1.54 + 0j,
+						 'EC'   : 1.80 + 0.79j,
+						 },
 				}
 
 
@@ -120,17 +131,22 @@ def _basic(df_che, df_ref, df_water, df_density, nam_lst):
 
 
 	## refractive index
-	df_RI = DataFrame()
+	ri_dic = {}
+	for _lambda, _coe in RI_coe.items():
 
-	for _ky, _df in df_vol.items():
-		if 'total' in _ky: continue
-		df_RI[_ky] = (_df * RI_coe[_ky])
-	
-	df_RI['RI_wet'] = None
-	if df_water is not None:
-		df_RI['RI_wet'] = (df_RI / df_vol['total_wet'].to_frame().values).sum(axis=1)
+		df_RI = DataFrame()
 
-	df_RI['RI_dry'] = (df_RI[vol_coe.keys()] / df_vol['total_dry'].to_frame().values).sum(axis=1)
+		for _ky, _df in df_vol.items():
+			if 'total' in _ky: continue
+			df_RI[_ky] = (_df * _coe[_ky])
+		
+		df_RI['RI_wet'] = None
+		if df_water is not None:
+			df_RI['RI_wet'] = (df_RI / df_vol['total_wet'].to_frame().values).sum(axis=1)
+
+		df_RI['RI_dry'] = (df_RI[vol_coe.keys()] / df_vol['total_dry'].to_frame().values).sum(axis=1)
+
+		ri_dic[f'RI_{_lambda}'] = df_RI[['RI_dry', 'RI_wet']]
 
 
 	## mole and equivalent
@@ -142,11 +158,11 @@ def _basic(df_che, df_ref, df_water, df_density, nam_lst):
 	out = { 'mass'    : df_mass,
 			'volume'  : df_vol,
 			'vol_cal' : df_vol_cal,
-			'RI' 	  : df_RI[['RI_dry', 'RI_wet']],
 			'eq' 	  : df_eq,
 			'density_mat' : df_den,
 			'density_rec' : df_den_rec,
 			}
+	out.update(ri_dic)
 
 
 	for _ky, _df in out.items():

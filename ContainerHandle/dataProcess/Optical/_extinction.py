@@ -35,7 +35,7 @@ def _basic(df_abs, df_sca, df_ec, df_mass, df_no2):
 
 	## other
 	if df_ec is not None:
-		df_out['eBC'] = df_ec
+		df_out['eBC'] = df_ec / 1e3
 
 	return df_out
 
