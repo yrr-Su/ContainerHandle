@@ -254,7 +254,7 @@ class _reader:
 		_f_raw_done, _f_qc_done = None, None
 
 		## read pickle if pickle file exists and 'reset=False' or process raw data or append new data
-		_pkl_exist = self.path/self.pkl_nam in list(self.path.glob('*.pkl'))
+		_pkl_exist = self.path / self.pkl_nam in list(self.path.glob('*.pkl'))
 		if _pkl_exist & ( (~self.reset) | (self.apnd) ):
 			print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mPICKLE\033[0m file of {self.nam}")
 

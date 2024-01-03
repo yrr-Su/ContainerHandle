@@ -17,6 +17,7 @@ __all__ = [
 			'VOC_TH',
 			'VOC_ZM',
 			'SMPS_genr',
+			'SMPS_aim11',
 
 
 

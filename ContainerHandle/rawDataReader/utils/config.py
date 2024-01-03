@@ -48,6 +48,13 @@ meta = {
 
 					 },
 
+		"SMPS_aim11" : {
+					 "pattern"   : "*.csv",
+					 "freq"		 : "6T",
+					 "deter_key" : { "Bins" : ["all"] },
+
+					 },
+
 		"APS_3321" : {
 					  "pattern"   : "*.TXT",
 					  "freq"	  : "6T",
