@@ -39,7 +39,7 @@ class reader(_reader):
 		_df = _df.mask(_df['total'] < 2000)
 
 		## remove the bin over 400 nm which num. conc. larger than 4000 
-		_df_remv_ky = _df.keys()[:-2][_df.keys()[:-2] >= 400.]
+		_df_remv_ky = _df.keys()[:-1][_df.keys()[:-1] >= 400.]
 
 		_df[_df_remv_ky] = _df[_df_remv_ky].copy().mask(_df[_df_remv_ky] > 4000.)
 

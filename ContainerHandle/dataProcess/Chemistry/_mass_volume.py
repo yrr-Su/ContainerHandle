@@ -115,6 +115,7 @@ def _basic(df_che, df_ref, df_water, df_density, nam_lst):
 
 
 	## density
+	df_den = None
 	df_vol_cal = DataFrame()
 	df_den_rec = df_mass['total'] / df_vol['total_dry']
 	if df_density is not None:
