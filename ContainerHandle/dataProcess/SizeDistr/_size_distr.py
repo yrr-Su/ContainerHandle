@@ -62,7 +62,7 @@ def _basic(df, hybrid, unit, bin_rg, input_type):
 	out_dic['surface_norm'] = out_dic['number_norm'] * n.pi * dp**2
 	out_dic['volume_norm']  = out_dic['number_norm'] * n.pi * (dp**3) / 6
 
-	## size range mode process 
+	## size range mode process
 	df_oth = DataFrame(index=dN.index)
 
 	bound = n.array([(dp.min(), dp.max() + 1), (10, 25), (25, 100), (100, 1e3), (1e3, 2.5e3),])
@@ -79,7 +79,10 @@ def _basic(df, hybrid, unit, bin_rg, input_type):
 			_dt = _tp_dt[_dia].copy()
 
 			df_oth[f'total_{_tp_nam}_{_md_nam}'], df_oth[f'GMD_{_tp_nam}_{_md_nam}'], df_oth[f'GSD_{_tp_nam}_{_md_nam}'] = _geometric_prop(_dia,_dt)
-			df_oth[f'mode_{_tp_nam}_{_md_nam}'] = _dt.idxmax(axis=1)
+
+			_index = _dt.index.copy()
+			_dt_nona = _dt.dropna(how='all').copy()
+			df_oth[f'mode_{_tp_nam}_{_md_nam}'] = _dt_nona.idxmax(axis=1).reindex(_index)
 
 	## out
 	out_dic['other'] = df_oth

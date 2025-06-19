@@ -7,76 +7,76 @@ meta = {
 
 
 		"Aurora" : {
-				  "pattern"   : "*.csv",
+				  "pattern"   : r".*\.csv$",
 				  "freq"	  : "1T",
 				  "deter_key" : { "Scatter Coe. (550 nm)" : ["G"] },
 
 				  },
 
 		"NEPH" : {
-				  "pattern"   : "*.DAT",
+				  "pattern"   : r".*\.DAT$",
 				  "freq"	  : "5T",
 				  "deter_key" : { "Scatter Coe. (550 nm)" : ["G"] },
 
 				  },
 
 		"Table" : {
-				   "pattern"   : "*.csv",
+				   "pattern"   : r".*\.csv$",
 				   "freq"	   : "1h",
 				   "deter_key" : None,
 
 				   },
 
 		"EPA_vertical" : {
-				   "pattern"   : "*.csv",
+				   "pattern"   : r".*\.csv$",
 				   "freq"	   : "1h",
 				   "deter_key" : None,
 
 				   },
 
 		"SMPS_TH" : {
-					 "pattern"   : "*.txt",
+					 "pattern"   : r".*\.txt$",
 					 "freq"		 : "6T",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					 },
 
 		"SMPS_genr" : {
-					 "pattern"   : "*.txt",
+					 "pattern"   : r".*\.txt$",
 					 "freq"		 : "6T",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					 },
 
 		"SMPS_aim11" : {
-					 "pattern"   : "*.csv",
+					 "pattern"   : r".*\.csv$",
 					 "freq"		 : "6T",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					 },
 
 		"APS_3321" : {
-					  "pattern"   : "*.TXT",
+					  "pattern"   : r".*\.TXT$",
 					  "freq"	  : "6T",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					  },
 
 		"AE33" : {
-				  "pattern"	  : "[!ST|!CT|!FV]*[!log]_AE33*.dat",
+				  "pattern"	  : r"^(?!.*(ST|CT|FV|log)).*_AE33.*\.dat$",
 				  "freq"	  : "1T",
 				  "deter_key" : { "BC Mass Conc. (880 nm)" : ["BC6"] },
 
 				  },
 
 		"AE43" : {
-				  "pattern"	  : "[!ST|!CT|!FV]*[!log]_AE43*.dat",
+				  "pattern"	  : r"^(?!.*(ST|CT|FV|log)).*_AE43.*\.dat$",
 				  "freq"	  : "1T",
 				  "deter_key" : { "BC Mass Conc. (880 nm)" : ["BC6"] },
 				},
 
 		"TEOM" : {
-				  "pattern"	  : "*.csv",
+				  "pattern"	  : r".*\.csv$",
 				  "freq"	  : "6T",
 				  "deter_key" : { "PM1.0 Mass Conc." : ["PM_Total"], 
 								  "PM1.0 NV Mass Conc." : ["PM_NV"],}
@@ -84,7 +84,7 @@ meta = {
 				  },
 
 		"OCEC_LCRES" : {
-					    "pattern"   : "*LCRes.csv",
+					    "pattern"   : r".*LCRes\.csv$",
 					    "freq"	    : "1h",
 					    "deter_key" : { "Thermal OC/EC" : ["Thermal_EC", "Thermal_OC"],
 										"Thermal OC" : ["Thermal_OC"],
@@ -96,14 +96,14 @@ meta = {
 					},
 
 		"OCEC_RES" : {
-					    "pattern"   : "*[!LC|!Blanks]Res.csv",
+					    "pattern"   : r"^(?!(.*LC|.*Blanks)).*Res\.csv$",
 					    "freq"	    : "1h",
 					    "deter_key" : None,
 
 					},
 
 		"IGAC_TH" : {
-				   "pattern"   : "*.csv",
+				   "pattern"   : r".*\.csv$",
 				   "freq"	   : "1h",
 				   "deter_key" : { "Na+"   : ["Na+"],
 								   "NH4+"  : ["NH4+"],
@@ -119,7 +119,7 @@ meta = {
 				   },
 
 		"IGAC_ZM" : {
-				   "pattern"   : "*.csv",
+				   "pattern"   : r".*\.csv$",
 				   "freq"	   : "1h",
 				   "deter_key" : { "Na+"   : ["Na+"],
 								   "NH4+"  : ["NH4+"],
@@ -136,14 +136,14 @@ meta = {
 				   },
 
 		"VOC_TH" : {
-				   "pattern"   : "*.csv",
+				   "pattern"   : r".*\.csv$",
 				   "freq"	   : "1h",
 				   "deter_key" : None,
 
 				   },
 
 		"VOC_ZM" : {
-				   "pattern"   : "*.csv",
+				   "pattern"   : r".*\.csv$",
 				   "freq"	   : "1h",
 				   "deter_key" : None,
 

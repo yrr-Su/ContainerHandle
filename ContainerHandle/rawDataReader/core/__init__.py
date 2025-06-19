@@ -1,12 +1,14 @@
+from __future__ import annotations
 
 from datetime import datetime as dtm, timedelta as dtmdt
-from pandas import date_range, concat, to_numeric, to_datetime
+from pandas import DataFrame, date_range, concat, to_numeric, to_datetime
 from pathlib import Path
 from ..utils.config import meta
 import pickle as pkl
 import json as jsn
 import numpy as n
 import shutil
+import re
 
 import logging
 
@@ -27,7 +29,7 @@ __all__ = [
 ## list the file in the path and 
 ## read pickle file if it exisits, else read raw data and dump the pickle file
 class _reader:
-    
+
     nam = None
 
     ## initial setting
@@ -39,6 +41,7 @@ class _reader:
 
     def __init__(self,
                  _path,
+                 add_log=True,
                  QC=True,
                  csv_raw=True,
                  reset=False,
@@ -51,12 +54,13 @@ class _reader:
         # logger.info(f"Reading file and process data")
 
         ## class parameter
-        self.index = lambda _freq: date_range(_sta,_fin,freq=_freq)
+        # self.index = lambda _freq: date_range(_sta,_fin,freq=_freq)
         self.path  = Path(_path)
         self.meta  = meta[self.nam]
         if update_meta is not None:
             self.meta.update(update_meta)
 
+        self.add_log = add_log
         self.reset = reset
         self.rate  = rate
         self.qc    = QC
@@ -72,14 +76,16 @@ class _reader:
         self.csv_out = f'output_{self.nam.lower()}.csv'
 
         self.path_trouble = self.path / 'trouble_file'
-        if not self.path_trouble.exists():
-            self.path_trouble.mkdir(exist_ok=True)
+        self.path_unncessary = self.path / 'unnecessary_file'
+
 
     # print(f" from {_sta.strftime('%Y-%m-%d %X')} to {_fin.strftime('%Y-%m-%d %X')}")
         # print('='*65)
         # print(f"{dtm.now().strftime('%m/%d %X')}")
 
     def loggerCreater(self) -> None:
+        self.path_unncessary.mkdir(exist_ok=True)
+        self.path_trouble.mkdir(exist_ok=True)
 
         self.logger = logging.getLogger(self.nam)
         self.logger.setLevel(logging.INFO)
@@ -112,7 +118,7 @@ class _reader:
 
     ## dependency injection function
     ## read raw data
-    def _raw_reader(self,_file):
+    def _raw_reader(self,_file) -> DataFrame: # type: ignore[override]
         ## customize each instrument
         ## read one file
         pass
@@ -141,7 +147,10 @@ class _reader:
 
         _st, _ed  = _df.index.sort_values()[[0,-1]]
         _start, _end = to_datetime(_start) or _st, to_datetime(_end) or _ed
-        _idx = date_range(_start,_end,freq=_df.index.freq.copy())
+        try:
+            _idx = date_range(_start,_end,freq=_df.index.freq.copy())
+        except ValueError as _err:
+            print(f'\n\nDataFrame index without time freq\nerror: {_err}')
         _idx.name = 'time'
 
         return _df.reindex(_idx), _st, _ed
@@ -268,41 +277,56 @@ class _reader:
         return _fout_raw, _fout_qc
 
     ## read raw data
-    def _read_raw(self,):
-        _df_con, _f_list = None, list(self.path.glob(self.meta['pattern']))
+    def _read_raw(self,) -> tuple[DataFrame | None, DataFrame | None]:
+        _df_con = None
 
-        for file in _f_list:
-            if file.name in [self.csv_out,
-                             self.csv_nam,
-                             self.csv_nam_raw,
-                             f'{self.nam}.log'
-                             ]: continue
+        for file in self.path.glob('*'):
+            if file.is_dir():
+                continue
 
-            print(f"\r\t\treading {file.name}",end='')
+            elif file.name in [
+                self.csv_out,
+                self.csv_nam,
+                self.csv_nam_raw,
+                f'{self.nam}.log',
+                self.pkl_nam_raw,
+                self.pkl_nam,
+                ]:
+                continue
+
+            elif re.search(self.meta['pattern'], file.name) is None:
+                shutil.move(file, self.path_unncessary / file.name)
+                continue
+
+            print(f"\r\t\treading {file.name.ljust(40)}", end='')
+
             try:
                 _df = self._raw_reader(file)
-                self.logger.info(
-                    f"Reading {file.name}:\n" \
-                    f"{_df.keys()}\n"
-                    )
-
-            except Exception as _err:
-                _df = None
-                print(f"\n\t\t\033[31m{_err}\033[0m")
-                self.logger.error(
-                    f"Reading {file.name}:\n" \
-                    f"{_err}\n"
-                    )
-
-                shutil.move(file, self.path_trouble / file.name)
+                if self.add_log:
+                    self.logger.info(
+                        f"Reading {file.name}:\n" \
+                        f"{_df.keys()}\n"
+                        )
 
             except Warning as _war:
                 _df = None
                 print(f"\n\t\t\033[31m{_war}\033[0m")
-                self.logger.error(
-                    f"Reading {file.name}:\n" \
-                    f"{_war}\n"
-                    )
+                if self.add_log:
+                    self.logger.error(
+                        f"Reading {file.name}:\n" \
+                        f"{_war}\n"
+                        )
+                    shutil.move(file, self.path_trouble / file.name)
+
+            except Exception as _err:
+                _df = None
+                print(f"\n\t\t\033[31m{_err}\033[0m")
+                if self.add_log:
+                    self.logger.error(
+                        f"Reading {file.name}:\n" \
+                        f"{_err}\n"
+                        )
+
                 shutil.move(file, self.path_trouble / file.name)
 
             ## concat the concated list
@@ -323,7 +347,6 @@ class _reader:
 
     ## main flow
     def _run(self, _start, _end):
-        self.loggerCreater()
 
         _f_raw_done, _f_qc_done = None, None
 
@@ -331,6 +354,7 @@ class _reader:
         _pkl_exist = self.path / self.pkl_nam in list(self.path.glob('*.pkl'))
         if _pkl_exist & ( (~self.reset) | (self.apnd) ):
             print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mPICKLE\033[0m file of {self.nam}")
+            print(f"\n\t\tFile Path: {self.path}")
 
             _f_raw_done, _f_qc_done = self._read_pkl()
 
@@ -346,6 +370,8 @@ class _reader:
 
         ## read raw data
         print(f"\n\t{dtm.now().strftime('%m/%d %X')} : Reading \033[96mRAW DATA\033[0m of {self.nam} and process it")
+        if self.add_log:
+            self.loggerCreater()
 
         _f_raw, _f_qc = self._read_raw()
         if _f_raw is None: return None
