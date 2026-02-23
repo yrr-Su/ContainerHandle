@@ -11,8 +11,10 @@ class reader(_reader):
 
     nam = 'SMPS_genr'
 
-    def _raw_reader(self,_file):
+    def _raw_reader(self, _file):
         with open(_file, 'r', encoding='utf-8', errors='ignore') as f:
+
+            time_format = self._oth_set.get('time_format') or '%m/%d/%y%X'
 
             skiprows = 0
             for _line in f:
@@ -23,13 +25,20 @@ class reader(_reader):
 
                 skiprows += 1
 
-            _df = read_table(f, skiprows=skiprows)
-            _tm_idx = to_datetime(_df['Date'] + _df['Start Time'], format='%m/%d/%y%X', errors='coerce')
+            _df = read_table(f, skiprows=skiprows, low_memory=False)
+            _tm_idx = to_datetime(
+                _df['Date'] + _df['Start Time'],
+                format=time_format,
+                errors='coerce')
 
             ## index
             _df = _df.set_index(_tm_idx).loc[_tm_idx.dropna()]
 
             ## keys
+            if 'Instrument Errors' in _df.keys():
+                _normal_index = _df['Instrument Errors'] == 'Normal Scan'
+                _df = _df.loc[_normal_index]
+
             _key = to_numeric(_df.keys(), errors='coerce')
             _df.columns = _key
             _df = _df.loc[:, ~_key.isna()]

@@ -12,9 +12,19 @@ class reader(_reader):
 
 	nam = 'APS_3321'
 
-	def _raw_reader(self,_file):
+	def _raw_reader(self, _file):
+
+		datetime_format = self._oth_set.get('datetime_format') or '%m/%d/%y %X'
+
+
 		with open(_file,'r',encoding='utf-8',errors='ignore') as f:
-			_df  = read_table(f,skiprows=6,parse_dates={'Time':['Date','Start Time']}).set_index('Time')
+
+			_df  = read_table(f,
+					 skiprows=6,
+					 parse_dates={'Time':['Date','Start Time']},
+					 date_format=datetime_format,
+					 ).set_index('Time')
+
 			_key = list(_df.keys()[3:54]) ## 542 ~ 1981
 
 			## create new keys

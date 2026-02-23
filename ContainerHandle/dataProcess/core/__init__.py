@@ -6,11 +6,12 @@ from datetime import datetime as dtm
 
 class _writter:
 
-	def __init__(self, path_out=None, excel=True, csv=False):
+	def __init__(self, path_out=None, excel=True, csv=False, name=None):
 
 		self.path_out = Path(path_out) if path_out is not None else path_out
 		self.excel	  = excel
 		self.csv	  = csv
+		self.name	  = name
 
 	def _pre_process(self,_out):
 
@@ -23,6 +24,9 @@ class _writter:
 		return _out
 
 	def _save_out(self, _nam, _out):
+
+		if self.name is not None:
+			_nam = self.name
 
 		_check = True
 		while _check:

@@ -291,6 +291,7 @@ class _reader:
                 f'{self.nam}.log',
                 self.pkl_nam_raw,
                 self.pkl_nam,
+                'outlier.json',
                 ]:
                 continue
 

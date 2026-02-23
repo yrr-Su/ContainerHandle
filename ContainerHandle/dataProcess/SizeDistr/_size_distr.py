@@ -86,7 +86,6 @@ def _basic(df, hybrid, unit, bin_rg, input_type):
 
 	## out
 	out_dic['other'] = df_oth
-	
 
 	return out_dic
 

@@ -17,6 +17,6 @@ def _mie(_psd_ori, _RI_ori, _wave):
 
 	_out = Mie_SD(_RI.values, 550, _psd)
 
-	return _out.reindex(_ori_idx)
+	return _out
 
 

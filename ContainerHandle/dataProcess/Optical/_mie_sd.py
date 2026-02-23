@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # http://pymiescatt.readthedocs.io/en/latest/forward.html
 import numpy as np
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid
 from scipy.special import jv, yv
 import warnings
 from pandas import date_range, concat, DataFrame, to_numeric, to_datetime, Series
+
+from ContainerHandle.dataProcess.shared.function import standard_output
 
 def coerceDType(d):
 	if type(d) is not np.ndarray:
@@ -41,7 +43,9 @@ def Mie_ab(m, x, nmax, df_n):
 	df_n /= x.reshape(-1, 1)
 	for _bin_idx, (_nmx_ary, _mx, _nmax) in enumerate(zip(nmx.T, mx.T, nmax)):
 		
-		df_D = DataFrame(np.nan, index=np.arange(m.size), columns=df_n.keys())
+		df_D = DataFrame(
+			np.nan, index=np.arange(m.size), columns=df_n.keys()
+			).astype(complex)
 		
 		Dn_lst = []
 		for _nmx, _uni_idx in DataFrame(_nmx_ary).groupby(0).groups.items():
@@ -125,8 +129,8 @@ def Mie_SD(m_ary, wavelength, psd, multp_m_in1psd=False, dt_chunk_size=10, q_tab
 		qext_all = np.repeat(qext[np.newaxis, :, :], len(aSDn), axis=0).reshape(*aSDn_all.shape)
 		qsca_all = np.repeat(qsca[np.newaxis, :, :], len(aSDn), axis=0).reshape(*aSDn_all.shape)
 
-		df_ext = DataFrame(trapz(aSDn_all * qext_all), columns=m_ary, index=psd.index).astype(float)
-		df_sca = DataFrame(trapz(aSDn_all * qsca_all), columns=m_ary, index=psd.index).astype(float)
+		df_ext = DataFrame(trapezoid(aSDn_all * qext_all), columns=m_ary, index=psd.index).astype(float)
+		df_sca = DataFrame(trapezoid(aSDn_all * qsca_all), columns=m_ary, index=psd.index).astype(float)
 		df_abs = df_ext - df_sca
 		# print('\tdone')
 
@@ -134,13 +138,9 @@ def Mie_SD(m_ary, wavelength, psd, multp_m_in1psd=False, dt_chunk_size=10, q_tab
 
 	else:
 		df_out = DataFrame(index=psd.index)
-		df_out['ext'] = trapz(qext * aSDn).astype(float)
-		df_out['sca'] = trapz(qsca * aSDn).astype(float)
+		df_out['ext'] = trapezoid(qext * aSDn).astype(float)
+		df_out['sca'] = trapezoid(qsca * aSDn).astype(float)
 		df_out['abs'] = df_out['ext'] - df_out['sca']
-	
-		return df_out
 
-
-
-
+		return standard_output(df_out)
 

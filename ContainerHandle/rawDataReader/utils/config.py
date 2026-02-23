@@ -8,14 +8,14 @@ meta = {
 
 		"Aurora" : {
 				  "pattern"   : r".*\.csv$",
-				  "freq"	  : "1T",
+				  "freq"	  : "1min",
 				  "deter_key" : { "Scatter Coe. (550 nm)" : ["G"] },
 
 				  },
 
 		"NEPH" : {
 				  "pattern"   : r".*\.DAT$",
-				  "freq"	  : "5T",
+				  "freq"	  : "5min",
 				  "deter_key" : { "Scatter Coe. (550 nm)" : ["G"] },
 
 				  },
@@ -36,48 +36,48 @@ meta = {
 
 		"SMPS_TH" : {
 					 "pattern"   : r".*\.txt$",
-					 "freq"		 : "6T",
+					 "freq"		 : "6min",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					 },
 
 		"SMPS_genr" : {
 					 "pattern"   : r".*\.txt$",
-					 "freq"		 : "6T",
+					 "freq"		 : "6min",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					 },
 
 		"SMPS_aim11" : {
 					 "pattern"   : r".*\.csv$",
-					 "freq"		 : "6T",
+					 "freq"		 : "6min",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					 },
 
 		"APS_3321" : {
 					  "pattern"   : r".*\.TXT$",
-					  "freq"	  : "6T",
+					  "freq"	  : "6min",
 					 "deter_key" : { "Bins" : ["all"] },
 
 					  },
 
 		"AE33" : {
 				  "pattern"	  : r"^(?!.*(ST|CT|FV|log)).*_AE33.*\.dat$",
-				  "freq"	  : "1T",
+				  "freq"	  : "1min",
 				  "deter_key" : { "BC Mass Conc. (880 nm)" : ["BC6"] },
 
 				  },
 
 		"AE43" : {
 				  "pattern"	  : r"^(?!.*(ST|CT|FV|log)).*_AE43.*\.dat$",
-				  "freq"	  : "1T",
+				  "freq"	  : "1min",
 				  "deter_key" : { "BC Mass Conc. (880 nm)" : ["BC6"] },
 				},
 
 		"TEOM" : {
 				  "pattern"	  : r".*\.csv$",
-				  "freq"	  : "6T",
+				  "freq"	  : "6min",
 				  "deter_key" : { "PM1.0 Mass Conc." : ["PM_Total"], 
 								  "PM1.0 NV Mass Conc." : ["PM_NV"],}
 
