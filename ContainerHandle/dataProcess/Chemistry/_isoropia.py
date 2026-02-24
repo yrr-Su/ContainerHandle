@@ -74,7 +74,7 @@ def _basic(df_che, path_out, nam_lst):
 	cond_idx = df_all[ ['SO42-','NH4+','NO3-'] ].dropna().index
 
 	with (pth_output).open('r', encoding='utf-8', errors='ignore') as f:
-		df_res = read_csv(f, delimiter='\s+').apply(to_numeric, errors='coerce').set_index(index)
+		df_res = read_csv(f, delimiter=r'\s+').apply(to_numeric, errors='coerce').set_index(index)
 
 	df_out['H'] = df_res['HLIQ'] / ( df_res['WATER'] / 1000 )
 
