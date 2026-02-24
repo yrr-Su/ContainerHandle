@@ -1,133 +1,118 @@
 # ContainerHandle
-container data process, raw data, different instrument
 
-## rawDataReader
+**ContainerHandle** 是一個專為大氣環境監測數據處理而設計的 Python 專案。它主要用於處理來自不同儀器（如 AE33, SMPS, Nephelometer 等）的原始數據，並提供化學成分、光學性質、粒徑分佈及 VOC 等資料的後續計算與分析功能。
 
-* NEPH
-* Table
-* APS_3321
-* SMPS_TH
-* AE33
-* AE43
-* TEOM
-* OCEC_RES
-* OCEC_LCRES
+## 專案結構
 
-## dataProcess
+本專案主要分為兩個核心模組：
 
-### Chemistry
+### 1. `rawDataReader` (原始數據讀取)
+負責讀取各種儀器的原始數據檔案，進行標準化處理（如時間索引、欄位名稱清洗）與數據品管 (QC)。
 
-**ReConstrc_basic(*df_chem, df_ref=None, df_water=None, nam_lst=['NH4+','SO42-','NO3-','Fe','Na+','OC','EC'])**
+**支援儀器 / 格式：**
+* **氣膠光學：**
+  * `AE33`, `AE43` (Aethalometer - 黑碳)
+  * `NEPH`, `Aurora` (Nephelometer - 散射)
+* **粒徑分佈：**
+  * `SMPS` (Scanning Mobility Particle Sizer) - 包含 `SMPS_TH`, `SMPS_aim11`, `SMPS_genr` 等不同型號的 SMPS
+  * `APS_3321` (Aerodynamic Particle Sizer)
+* **化學成分 / 氣體：**
+  * `OCEC` (有機碳/元素碳) - 包含 `OCEC_RES`, `OCEC_LCRES`
+  * `TEOM` (質量濃度)
+  * `VOC` (揮發性有機物) - 包含 `VOC_TH`, `VOC_ZM`
+  * `IGAC` (化學質量) - 包含 `IGAC_TH`, `IGAC_ZM`
+* **其他：**
+  * `Table`, `EPA_vertical`
 
-* ***df_chem** : *DataFrame or Serie scollection*
+### 2. `dataProcess` (數據處理與分析)
+對原始數據進行進一步處理與分析的功能。
 
-  * Some chemical compound dataframe(mass concentration), the order of the input dataframe can control by **nam_lst**
-* **df_ref** : *DataFrame or Series, default : None*
-
-  * Mass concentration of PM, to compare with the reconstructed mass
-* **df_water** : *DataFrame or Series, default : None*
-  * Mass concentration of ALWC, to reconstruct the wet parameter
-* **nam_lst** : *array-like, default : ['NH4+','SO42-','NO3-','Fe','Na+','OC','EC']*
-  * The order of the **df_chem**
-
-
-***Returns : dictionary***
-
-* *mass* : reconstructed mass concentration, including ALWC and total wet mass if **df_water** is not None
-* *volume* : reconstructed volume concentration, including ALWC and total wet volume if **df_water** is not None
-* *RI* : refractive index, including wet RI if **df_water** is not None
-
----
-
-**OCEC_basic(df_lcres, df_res, df_mass=None, ocec_ratio=None, ocec_ratio_month=1, hr_lim=200, least_square_range=(0.1,2.5,0.1))**
-
-* **df_lcres** : *DataFrame*
-  * LCRES data made by **rawDataReader.OCEC_LCRES**
-* **df_res** : *DataFrame*
-  * RES data made by **rawDataReader.OCEC_RES**
-* **df_mass** : *DataFrame or Series, default : None*
-  * To calculate the mass ratio with PM data
-* **ocec_ratio** : *float, default : None*
-  * To calculate POC and SOC
-* **ocec_ratio_month** : *int, default : 1*
-  * The number of the OC/EC calculated month, be ignore if **ocec_ratio** is not none
-* **hr_lim** : *int, default : 200*
-  * The minimum hours in given month(**ocec_ratio_month**) allow to calculate the OC/EC, be ignore if **ocec_ratio** is not none
-* **least_square_range** : *3-tuple, default : (0.1,2.5,0.1)*
-  * (start, end, step), the assumed value of OC/EC, be ignore if **ocec_ratio** is not none
-
-***Return : Dictionary***
-
-* *basic* : basic parameters and mass ratio status
-* *ratio* : mass ratio
+* **Chemistry (化學模組):**
+  * 化學物種質量重建 (Mass Reconstruction)
+  * 莫耳濃度轉換 (ug -> umol)
+  * ISORROPIA 模型介面 (熱力學平衡計算)
+* **Optical (光學模組):**
+  * Mie Theory 計算 (`_mie.py`, `_mie_sd.py`)
+  * 散射與吸收係數計算 (`_scattering.py`, `_absorption.py`)
+  * IMPROVE 公式
+* **SizeDistr (粒徑分佈模組):**
+  * 粒徑分佈合併演算法 (Merging size distributions)
+  * 統計參數計算
+* **VOC (揮發性有機物模組):**
+  * 生成潛勢計算 (Potential formation)
 
 ---
 
-**TEOM_basic(df_teom,df_check=None)**
+## 安裝與依賴
 
-* **df_teom** : *DataFrame*
-  * TEOM data made by **rawDataReader.TEOM**
-* **df_check** : *DataFrame or Series, default : None*
-  * The reference data to check the data accuracy
+### 系統需求
+* Python 3.x
+* Anaconda / Miniconda
 
-***Return : DataFrame***
+### 安裝步驟
 
-* TEOM parameter
+本專案提供了一個安裝批次檔 `install.bat`，可自動透過 conda 安裝所需的依賴套件。
 
-### Optical
+1. **Clone 或下載此專案** 到本地端。
+2. **執行安裝腳本**：
+   在目錄下雙擊 `install.bat` 或在終端機執行：
+   ```cmd
+   install.bat
+   ```
 
-**SAE(df_sca)**
-
-* **df_sca** : *DataFrame or Series*
-  * Scatter data made by **rawDataReader.NEPH**
-
-***Return : DataFrame***
-
-* Scatter angstrom exponential
-
----
-
-absCoe
-
----
-
-**AAE(df_abs)**
-
-* **df_abs** : *DataFrame or Series*
-  * Absorption coefficient data
-
-***Return : DataFrame***
-
-* Absorption angstrom exponential
+### 依賴套件 (`install.txt`)
+主要依賴包括：
+* `pandas` (數據處理)
+* `scipy` (科學計算)
+* `PyMieScatt` (光學 Mie 散射計算)
+* `openpyxl` (Excel 讀寫)
+* `lxml` (XML/HTML 解析)
 
 ---
 
-**basic(df_abs, df_sca, df_ec=None, df_mass=None)**
+## 使用範例 (Usage)
 
-* **df_abs** : *DataFrame or Series*
-  * Absorption angstrom exponential
-* **df_sca** : *DataFrame or Series*
-  * Scatter data made by **rawDataReader.NEPH**
-* **df_ec** : *DataFrame or Series, default : None*
-  * Black Carbon data
-* **df_mass** : *DataFrame or Series, default : None*
-  * Black Carbon data
+### 1. 讀取儀器數據
 
----
+使用 `rawDataReader` 下的模組來讀取特定儀器的數據。通常每個模組都有一個 `reader` 類別。
 
-Mie
+```python
+from ContainerHandle.rawDataReader import AE33
 
----
+file_path = r"path/to/your/AE33_data"
 
-IMPROVE
+# 初始化讀取器
+ae33_reader = AE33.reader(file_path)
 
-### SizeDistr
+df_ae33 = ae33_reader()
 
-basic
+```
 
----
+### 2. 數據處理 (化學重組範例)
 
-merge_SMPS_APS
+使用 `dataProcess` 進行分析，例如使用 `Optical` 模組進行米氏散射計算。
+
+```python
+import pandas as pd
+
+from ContainerHandle.dataProcess import Optical
+
+file_output_path = r"path/to/your/Mie"
+psd_file = r"path/to/your/psd.pkl"
+RI_file = r"path/to/your/RI.pkl"
+
+
+df_psd = pd.read_pickle(psd_file)
+df_RI = pd.read_pickle(RI_file)
+
+opt_process = Optical(path_out=file_output_path,
+                      excel=False,
+                      csv=True)
+
+mie = opt_process.Mie(df_psd, df_RI)
+```
+
+
 
 
 
