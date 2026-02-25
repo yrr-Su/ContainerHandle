@@ -151,6 +151,7 @@ class _reader:
             _idx = date_range(_start,_end,freq=_df.index.freq.copy())
         except ValueError as _err:
             print(f'\n\nDataFrame index without time freq\nerror: {_err}')
+            _idx = _df.index.sort_values()
         _idx.name = 'time'
 
         return _df.reindex(_idx), _st, _ed
